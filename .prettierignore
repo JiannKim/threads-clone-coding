@@ -1,0 +1,8 @@
+node_modules
+.expo
+.expo-shared
+dist
+*.log
+package-lock.json
+build
+.expo-shared
