@@ -1,35 +1,67 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
+import { Ionicons } from "@expo/vector-icons";
+import { router, Tabs } from "expo-router";
 
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
-  return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-        }}
-      />
-    </Tabs>
-  );
+export default function TabsLayout() {
+    return (
+        <Tabs screenOptions={{
+            headerShown: false,
+            tabBarShowLabel: false,
+            tabBarStyle: {
+                display: "flex",
+                backgroundColor: "black",
+                borderTopWidth: 0,
+                height: 80,
+                paddingTop: 10,
+                paddingBottom: 10,
+                paddingHorizontal: 20,
+                borderRadius: 100,
+                overflow: "hidden",
+                position: "absolute",
+                marginHorizontal: 20,
+                marginBottom: 20,
+            },
+            tabBarItemStyle: {
+                justifyContent: "center",
+                alignItems: "center",
+            },
+        }}>
+            <Tabs.Screen name="index" options={{
+                title: "Home",
+                tabBarIcon: ({ color, size }) => (
+                <Ionicons name="home-outline" color={color} size={size} />
+            ),
+            }} />
+            <Tabs.Screen name="search" options={{
+                title: "Search",
+            tabBarIcon: ({ color, size }) => (
+                <Ionicons name="search" color={color} size={size} />
+            ),
+            }} />
+            <Tabs.Screen name="add"
+                listeners={() => ({
+                    tabPress: (e) => {
+                        e.preventDefault();
+                        router.navigate("/modal");
+                    },
+                })}
+                options={{
+                title: "Add",
+                tabBarIcon: ({ color, size }) => (
+                <Ionicons name="add" color={color} size={size} />
+            ),
+            }}   /> 
+            <Tabs.Screen name="activity" options={{
+            title: "Activity",
+            tabBarIcon: ({ color, size }) => (
+                <Ionicons name="heart-outline" color={color} size={size} />
+            ),
+            }} />
+            <Tabs.Screen name="[username]" options={{
+            title: "User",
+            tabBarIcon: ({ color, size }) => (
+                <Ionicons name="person-outline" color={color} size={size} />
+            ),
+            }} />
+        </Tabs>
+    );
 }
