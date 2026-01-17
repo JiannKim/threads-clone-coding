@@ -16,6 +16,7 @@ export default function TabsLayout() {
   return (
     <>
       <Tabs
+        backBehavior="history"
         screenOptions={{
           headerShown: false,
           tabBarShowLabel: false,
@@ -45,8 +46,8 @@ export default function TabsLayout() {
           name="(home)"
           options={{
             title: "Home",
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="home-outline" color={color} size={size} />
+            tabBarIcon: ({ color, size, focused }) => (
+              <Ionicons name={focused ? "home" : "home-outline"} color={focused ? "white" : color} size={size} />
             ),
           }}
         />
@@ -54,8 +55,8 @@ export default function TabsLayout() {
           name="search"
           options={{
             title: "Search",
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="search" color={color} size={size} />
+            tabBarIcon: ({ color, size, focused }) => (
+              <Ionicons name={focused ? "search" : "search-sharp"} color={focused ? "white" : color} size={size} />
             ),
           }}
         />
@@ -90,8 +91,8 @@ export default function TabsLayout() {
           }}
           options={{
             title: "Activity",
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="heart-outline" color={color} size={size} />
+            tabBarIcon: ({ color, size, focused }) => (
+              <Ionicons name={focused ? "heart" : "heart-outline"} color={focused ? "white" : color} size={size} />
             ),
           }}
         />
@@ -107,8 +108,8 @@ export default function TabsLayout() {
           }}
           options={{
             title: "User",
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="person-outline" color={color} size={size} />
+            tabBarIcon: ({ color, size, focused }) => (
+              <Ionicons name={focused ? "person" : "person-outline"} color={focused ? "white" : color} size={size} />
             ),
           }}
         />
