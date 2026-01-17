@@ -16,8 +16,18 @@ export default function Index() {
         </TouchableOpacity>
       </View>
       <View>
-        <TouchableOpacity onPress={() => router.push(`/home/following`)}>
+        <TouchableOpacity onPress={() => router.push(`/following`)}>
           <Text>Following</Text>
+        </TouchableOpacity>
+      </View>
+      <View>
+        <TouchableOpacity onPress={() => router.push(`/@jiahn/post/1`)}>
+          <Text>post 1</Text>
+        </TouchableOpacity>
+      </View>
+      <View>
+        <TouchableOpacity onPress={() => router.push(`/@jiahn/post/2`)}>
+          <Text>post 2</Text>
         </TouchableOpacity>
       </View>
     </View>

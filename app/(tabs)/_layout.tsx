@@ -24,6 +24,8 @@ export default function TabsLayout() {
         tabBarItemStyle: {
           justifyContent: "center",
           alignItems: "center",
+          height: "100%",
+          paddingVertical: 10,
         },
       }}
     >
@@ -79,9 +81,9 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="(home)/following"
+        name="(post)/[username]/post/[postID]"
         options={{
-          title: "Following",
+          title: "Post",
           href: null,
         }}
       />
