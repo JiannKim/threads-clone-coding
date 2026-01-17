@@ -35,10 +35,10 @@ export default function TabsLayout() {
         }),
       ]).start();
     };
-    
+
     return (
       <Pressable
-        {...restProps as any}
+        {...(restProps as any)}
         onPress={onPress}
         onPressOut={handlePressOut}
         style={[
@@ -51,8 +51,7 @@ export default function TabsLayout() {
           style,
         ]}
       >
-        <Animated.View style={{transform: [{scale: scaleValue }]
-        }}>
+        <Animated.View style={{ transform: [{ scale: scaleValue }] }}>
           {children}
         </Animated.View>
       </Pressable>
