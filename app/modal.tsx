@@ -150,10 +150,13 @@ export default function Modal() {
       </View>
       <View style={styles.contentContainer}>
         <View style={styles.userInfoContainer}>
-          <Text style={styles.username}>dominica.world</Text>
+          <View style={styles.userInfoUsernameContainer}>
+            <Text style={styles.username}>dominica.world</Text>
+            <Ionicons name="chevron-forward-outline" size={14} color="#8e8e93" />
+          </View>
           {index > 0 && (
             <Pressable
-              onPress={() => removeThread(item.id)}
+            onPress={() => removeThread(item.id)}
               style={styles.removeButton}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
@@ -473,5 +476,10 @@ const styles = StyleSheet.create({
   locationText: {
     fontSize: 14,
     color: "#8e8e93",
+  },
+  userInfoUsernameContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
   },
 });
