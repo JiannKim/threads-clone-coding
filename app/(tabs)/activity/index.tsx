@@ -7,13 +7,13 @@ export default function Index() {
 
   if (
     ![
-      "activity",
-      "activity/follows",
-      "activity/replies",
-      "activity/mentions",
-      "activity/quotes",
-      "activity/reposts",
-      "activity/verified",
+      "/activity",
+      "/activity/follows",
+      "/activity/replies",
+      "/activity/mentions",
+      "/activity/quotes",
+      "/activity/reposts",
+      "/activity/verified",
     ].includes(pathname)
   ) {
     return <NotFound />;
