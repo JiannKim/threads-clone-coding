@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router, Tabs } from "expo-router";
-import { useState } from "react";
-import { Modal,Pressable, Text, View } from "react-native";
+import { useRef, useState } from "react";
+import { Modal, Pressable, Text, View, Animated } from "react-native";
+import { type BottomTabBarButtonProps } from "@react-navigation/bottom-tabs";
 
 export default function TabsLayout() {
   const isLoggedIn = true;
@@ -13,11 +14,57 @@ export default function TabsLayout() {
     setIsLoginModalOpen(false);
   };
 
+  const AnimatedTabBarButton = ({
+    children,
+    onPress,
+    style,
+    ...restProps
+  }: BottomTabBarButtonProps) => {
+    const scaleValue = useRef(new Animated.Value(1)).current;
+    const handlePressOut = () => {
+      Animated.sequence([
+        Animated.spring(scaleValue, {
+          toValue: 1.15,
+          useNativeDriver: true,
+          speed: 300,
+        }),
+        Animated.spring(scaleValue, {
+          toValue: 1,
+          useNativeDriver: true,
+          speed: 300,
+        }),
+      ]).start();
+    };
+    
+    return (
+      <Pressable
+        {...restProps as any}
+        onPress={onPress}
+        onPressOut={handlePressOut}
+        style={[
+          {
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "red",
+          },
+          style,
+        ]}
+      >
+        <Animated.View style={{transform: [{scale: scaleValue }]
+        }}>
+          {children}
+        </Animated.View>
+      </Pressable>
+    );
+  };
+
   return (
     <>
       <Tabs
         backBehavior="history"
         screenOptions={{
+          tabBarButton: (props) => <AnimatedTabBarButton {...props} />,
           headerShown: false,
           tabBarShowLabel: false,
           tabBarStyle: {
@@ -47,7 +94,11 @@ export default function TabsLayout() {
           options={{
             title: "Home",
             tabBarIcon: ({ color, size, focused }) => (
-              <Ionicons name={focused ? "home" : "home-outline"} color={focused ? "white" : color} size={size} />
+              <Ionicons
+                name={focused ? "home" : "home-outline"}
+                color={focused ? "white" : color}
+                size={size}
+              />
             ),
           }}
         />
@@ -56,7 +107,11 @@ export default function TabsLayout() {
           options={{
             title: "Search",
             tabBarIcon: ({ color, size, focused }) => (
-              <Ionicons name={focused ? "search" : "search-sharp"} color={focused ? "white" : color} size={size} />
+              <Ionicons
+                name={focused ? "search" : "search-sharp"}
+                color={focused ? "white" : color}
+                size={size}
+              />
             ),
           }}
         />
@@ -92,7 +147,11 @@ export default function TabsLayout() {
           options={{
             title: "Activity",
             tabBarIcon: ({ color, size, focused }) => (
-              <Ionicons name={focused ? "heart" : "heart-outline"} color={focused ? "white" : color} size={size} />
+              <Ionicons
+                name={focused ? "heart" : "heart-outline"}
+                color={focused ? "white" : color}
+                size={size}
+              />
             ),
           }}
         />
@@ -109,7 +168,11 @@ export default function TabsLayout() {
           options={{
             title: "User",
             tabBarIcon: ({ color, size, focused }) => (
-              <Ionicons name={focused ? "person" : "person-outline"} color={focused ? "white" : color} size={size} />
+              <Ionicons
+                name={focused ? "person" : "person-outline"}
+                color={focused ? "white" : color}
+                size={size}
+              />
             ),
           }}
         />
@@ -129,24 +192,29 @@ export default function TabsLayout() {
       >
         <View
           style={{
-            flex: 1, justifyContent: "flex-end", width: "100%", height: "100%",
+            flex: 1,
+            justifyContent: "flex-end",
+            width: "100%",
+            height: "100%",
             backgroundColor: "rgba(0, 0, 0, 0.5)",
           }}
         >
-          <View style={{ 
-            backgroundColor: "white",
-            padding: 20,
-            borderTopLeftRadius: 10,
-            borderTopRightRadius: 10,
-            width: "100%",
-            height: "50%",
-            justifyContent: "center",
-            alignItems: "center",
-          }}>
-          <Text>Login 하세요.</Text>
-          <Pressable onPress={closeLoginModal}>
-            <Text>Close</Text>
-          </Pressable>
+          <View
+            style={{
+              backgroundColor: "white",
+              padding: 20,
+              borderTopLeftRadius: 10,
+              borderTopRightRadius: 10,
+              width: "100%",
+              height: "50%",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Text>Login 하세요.</Text>
+            <Pressable onPress={closeLoginModal}>
+              <Text>Close</Text>
+            </Pressable>
           </View>
         </View>
       </Modal>
