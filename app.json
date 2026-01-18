@@ -12,7 +12,8 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.jihankim.threads",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSLocationWhenInUseUsageDescription": "이 앱은 사용자의 위치를 기반으로 기능을 제공하기 위해 위치 정보가 필요합니다.(Allow $(PRODUCT_NAME) to use your location.)"
       }
     },
     "android": {
@@ -41,6 +42,12 @@
           "dark": {
             "backgroundColor": "#000000"
           }
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
         }
       ]
     ],
