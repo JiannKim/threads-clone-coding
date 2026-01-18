@@ -42,8 +42,8 @@ export function ListFooter({
       </View>
       <View>
         <Pressable onPress={addThread} style={styles.input}>
-          <Text style={{ color: canAddThread ? "#999" : "#aaa" }}>
-            Add to thread
+          <Text style={{ color: canAddThread ? "#999" : "#ccc", paddingBottom: 4 }}>
+            스레드에 추가
           </Text>
         </Pressable>
       </View>
@@ -56,6 +56,10 @@ export default function Modal() {
   const [threads, setThreads] = useState<Thread[]>([
     { id: Date.now().toString(), text: "", imageUris: [] },
   ]);
+  const [topicText, setTopicText] = useState("");
+  const inputRefs = useRef<{ [key: string]: TextInput | null }>({});
+  const flatListRef = useRef<FlatList>(null);
+  const [newlyAddedThreadId, setNewlyAddedThreadId] = useState<string | null>(null);
   const insets = useSafeAreaInsets();
   const [replyOption, setReplyOption] = useState("Anyone");
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
@@ -133,6 +137,20 @@ export default function Modal() {
     );
   };
 
+  // 스레드가 추가되면 자동으로 최하단으로 스크롤 및 포커스
+  useEffect(() => {
+    if (newlyAddedThreadId) {
+      setTimeout(() => {
+        flatListRef.current?.scrollToEnd({ animated: true });
+      }, 50);
+      
+      setTimeout(() => {
+        inputRefs.current[newlyAddedThreadId]?.focus();
+        setNewlyAddedThreadId(null);
+      }, 100);
+    }
+  }, [newlyAddedThreadId]);
+
   const renderThreadItem = ({
     item,
     index,
@@ -153,6 +171,24 @@ export default function Modal() {
           <View style={styles.userInfoUsernameContainer}>
             <Text style={styles.username}>dominica.world</Text>
             <Ionicons name="chevron-forward-outline" size={14} color="#8e8e93" />
+            {index === 0 ? (
+              <View style={styles.topicContainer}>
+                <TextInput style={styles.topicText} value={topicText} onChangeText={(text) => setTopicText(text)} placeholder="주제 추가"
+                  placeholderTextColor="#999"
+                  multiline={false}
+              />
+                {threads.length > 1 && (
+                  <Text style={styles.topicIndexLabel}>{index + 1 }/{threads.length}</Text>
+                )}
+              </View>
+            ) : (
+              <View style={styles.topicContainer}>
+                <Text style={[styles.topicText, { color: "#8e8e93" }]}>{topicText}</Text>
+                {threads.length > 1 && (
+                  <Text style={styles.topicIndexLabel}>{index + 1 }/{threads.length}</Text>
+                )}
+              </View>
+            )}
           </View>
           {index > 0 && (
             <Pressable
@@ -164,14 +200,28 @@ export default function Modal() {
             </Pressable>
           )}
         </View>
+        { index === 0 ? (
+            <TextInput
+              style={styles.input}
+              placeholder={"새로운 소식이 있나요?"}
+              placeholderTextColor="#999"
+              value={item.text}
+              onChangeText={(text) => updateThreadText(item.id, text)}
+              multiline
+            />
+        ) : 
         <TextInput
+          ref={(ref) => {
+            inputRefs.current[item.id] = ref;
+          }}
           style={styles.input}
-          placeholder={"What's new?"}
+          placeholder={"내용을 더 추가해보세요..."}
           placeholderTextColor="#999"
           value={item.text}
           onChangeText={(text) => updateThreadText(item.id, text)}
           multiline
-        />
+          />
+        }
         {item.imageUris && item.imageUris.length > 0 && (
           <FlatList
             data={item.imageUris}
@@ -246,6 +296,7 @@ export default function Modal() {
       </View>
 
       <FlatList
+        ref={flatListRef}
         data={threads}
         keyExtractor={(item) => item.id}
         renderItem={renderThreadItem}
@@ -254,16 +305,20 @@ export default function Modal() {
             canAddThread={canAddThread}
             addThread={() => {
               if (canAddThread) {
+                const newId = Date.now().toString();
                 setThreads((prevThreads) => [
                   ...prevThreads,
-                  { id: Date.now().toString(), text: "", imageUris: [] },
+                  { id: newId, text: "", imageUris: [] },
                 ]);
+                setNewlyAddedThreadId(newId);
               }
             }}
           />
         }
         style={styles.list}
-        contentContainerStyle={{ backgroundColor: "#ddd" }}
+        contentContainerStyle={{
+          backgroundColor: "#fff",
+         }}
         keyboardShouldPersistTaps="handled"
       />
 
@@ -313,7 +368,7 @@ const styles = StyleSheet.create({
   },
   list: {
     flex: 1,
-    backgroundColor: "#eee",
+    marginBottom: 88,
   },
   threadContainer: {
     flexDirection: "row",
@@ -338,7 +393,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#555",
   },
   threadLine: {
-    width: 1.5,
+    width: 1.2,
     flexGrow: 1,
     backgroundColor: "#aaa",
     marginTop: 8,
@@ -481,5 +536,22 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
+  },
+  topicContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  topicText: {
+    fontSize: 14,
+  },
+  topicIndexLabel: {
+    fontSize: 14,
+    backgroundColor: "#f0f0f0",
+    color: "#8e8e93",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    letterSpacing: 0.8,
   },
 });
