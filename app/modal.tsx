@@ -88,8 +88,8 @@ export default function Modal() {
     );
   };
 
-  const canAddThread = (threads.at(-1)?.text.trim().length ?? 0) > 0;
-  const canPost = threads.every((thread) => thread.text.trim().length > 0);
+  const canAddThread = (threads.at(-1)?.text.trim().length ?? 0) > 0 || (threads.at(-1)?.imageUris.length ?? 0) > 0;
+  const canPost = threads.every((thread) => thread.text.trim().length > 0 || thread.imageUris.length > 0);
 
   const addImageToThread = (id: string, uri: string) => {};
 
@@ -416,6 +416,54 @@ export default function Modal() {
         keyboardShouldPersistTaps="handled"
       />
 
+      <RNModal
+        transparent={true}
+        visible={isDropdownVisible}
+        animationType="fade"
+        onRequestClose={() => setIsDropdownVisible(false)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setIsDropdownVisible(false)}
+        >
+          <View
+            style={[styles.dropdownContainer, { bottom: insets.bottom + 30 }]}
+          >
+            <Text style={styles.dropdownTitle}>답글을 달고 인용할 수 있는 사람</Text>
+            {replyOptions.map((option) => (
+              <Pressable
+                key={option}
+                style={[
+                  styles.dropdownOption,
+                  option === replyOption && styles.selectedOption,
+                ]}
+                onPress={() => {
+                  setReplyOption(option);
+                  setIsDropdownVisible(false);
+                }}
+              >
+                <Text
+                  style={[
+                    styles.dropdownOptionText,
+                    option === replyOption && styles.selectedOptionText,
+                  ]}
+                >
+                  {option}
+                </Text>
+                {option === replyOption && (
+                  <Ionicons
+                    name="checkmark"
+                    size={20}
+                    color="#007AFF"
+                    style={styles.checkIcon}
+                  />
+                )}
+              </Pressable>
+            ))}
+          </View>
+        </Pressable>
+      </RNModal>
+
       <View style={[styles.footer, { paddingBottom: insets.bottom + 10 }]}>
         <Pressable onPress={() => setIsDropdownVisible(true)}>
           <Text style={styles.footerText}>{replyOption} can reply & quote</Text>
@@ -583,17 +631,28 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   dropdownContainer: {
+    width: "60%",
     backgroundColor: "#fff",
     borderRadius: 10,
-    marginHorizontal: 10,
+    marginHorizontal: 15,
     overflow: "hidden",
-    marginBottom: 5,
+    marginBottom: 10,
   },
   dropdownOption: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingVertical: 15,
     paddingHorizontal: 20,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: "#e5e5e5",
+  },
+  dropdownTitle: {
+    fontSize: 13,
+    color: "#8e8e99",
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    fontWeight: "600",
   },
   selectedOption: {},
   dropdownOptionText: {
@@ -603,6 +662,9 @@ const styles = StyleSheet.create({
   selectedOptionText: {
     fontWeight: "600",
     color: "#007AFF",
+  },
+  checkIcon: {
+    marginLeft: 8,
   },
   removeButton: {
     padding: 4,
