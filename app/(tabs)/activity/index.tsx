@@ -20,6 +20,7 @@ export default function Index() {
   const { user } = useContext(AuthContext);
   const isLoggedIn = !!user;
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   if (
     ![
@@ -158,5 +159,7 @@ const styles = StyleSheet.create({
   tabBar: {
     flexDirection: "row",
     justifyContent: "space-between",
+    paddingHorizontal: 20,
+    gap: 20,
   },
 });

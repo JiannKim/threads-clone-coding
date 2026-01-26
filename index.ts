@@ -23,7 +23,7 @@ if (__DEV__) {
             accessToken: "access-token",
             refreshToken: "refresh-token",
             user: {
-              id: "jiahnkim",
+              id: "dominica.world",
               name: "김지안",
               description: "🐢 프로그래머, jongin's mother",
               profileImageUrl:
