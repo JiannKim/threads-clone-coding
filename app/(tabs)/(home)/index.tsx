@@ -1,26 +1,62 @@
-import { router, usePathname } from "expo-router";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  Text,
+  View,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  Pressable,
+} from "react-native";
+import { usePathname, useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BlurView } from "expo-blur";
+import { AuthContext } from "../../_layout";
+import { useContext, useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
+import SideMenu from "../../../components/SideMenu";
 
 export default function Index() {
+  const router = useRouter();
   const pathname = usePathname();
-  console.log("pathname:", pathname);
+  const insets = useSafeAreaInsets();
+  const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
+  const { user, logout } = useContext(AuthContext);
+  const isLoggedIn = !!user;
 
-  const isLoggedIn = false;
   return (
-    <SafeAreaView style={styles.container}>
-      <BlurView intensity={70} style={styles.header}>
+    <View
+      style={[
+        styles.container,
+        { paddingTop: insets.top, paddingBottom: insets.bottom },
+      ]}
+    >
+      <BlurView style={styles.header} intensity={70}>
+        {isLoggedIn && (
+          <Pressable
+            style={styles.menuButton}
+            onPress={() => {
+              setIsSideMenuOpen(true);
+            }}
+          >
+            <Ionicons name="menu" size={24} color="black" />
+          </Pressable>
+        )}
+        <SideMenu
+          isVisible={isSideMenuOpen}
+          onClose={() => setIsSideMenuOpen(false)}
+        />
         <Image
           source={require("../../../assets/images/react-logo.png")}
-          style={styles.logo}
+          style={styles.headerLogo}
         />
         {!isLoggedIn && (
           <TouchableOpacity
             style={styles.loginButton}
-            onPress={() => router.navigate(`/login`)}
+            onPress={() => {
+              console.log("loginButton onPress");
+              router.navigate(`/login`);
+            }}
           >
-            <Text style={styles.loginButtonText}>Login</Text>
+            <Text style={styles.loginButtonText}>로그인</Text>
           </TouchableOpacity>
         )}
       </BlurView>
@@ -28,14 +64,14 @@ export default function Index() {
         <View style={styles.tabContainer}>
           <View style={styles.tab}>
             <TouchableOpacity onPress={() => router.navigate(`/`)}>
-              <Text style={{ color: pathname === "/" ? "orange" : "black" }}>
+              <Text style={{ color: pathname === "/" ? "red" : "black" }}>
                 For you
               </Text>
             </TouchableOpacity>
           </View>
           <View style={styles.tab}>
             <TouchableOpacity onPress={() => router.navigate(`/following`)}>
-              <Text style={{ color: pathname === "/" ? "white" : "orange" }}>
+              <Text style={{ color: pathname === "/" ? "black" : "red" }}>
                 Following
               </Text>
             </TouchableOpacity>
@@ -43,66 +79,59 @@ export default function Index() {
         </View>
       )}
       <View>
-        <TouchableOpacity onPress={() => router.navigate(`/@jiahn/post/1`)}>
-          <Text>post 1</Text>
+        <TouchableOpacity onPress={() => router.push(`/@zerocho/post/1`)}>
+          <Text>게시글1</Text>
         </TouchableOpacity>
       </View>
       <View>
-        <TouchableOpacity onPress={() => router.navigate(`/@jiahn/post/2`)}>
-          <Text>post 2</Text>
+        <TouchableOpacity onPress={() => router.push(`/@zerocho/post/2`)}>
+          <Text>게시글2</Text>
         </TouchableOpacity>
       </View>
-    </SafeAreaView>
+      <View>
+        <TouchableOpacity onPress={() => router.push(`/@zerocho/post/3`)}>
+          <Text>게시글3</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "flex-start",
-    alignItems: "stretch",
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    width: "100%",
-    height: 80,
-    paddingVertical: 15,
-    borderWidth: 1,
-    position: "relative",
   },
   tabContainer: {
     flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
-    width: "100%",
-    padding: 20,
-    backgroundColor: "black",
   },
   tab: {
-    padding: 3,
+    flex: 1,
+    alignItems: "center",
   },
-  logo: {
-    width: 50,
-    height: 50,
-    position: "absolute",
-    left: "50%",
-    transform: [{ translateX: -25 }],
-    borderWidth: 1,
+  header: {
+    alignItems: "center",
+  },
+  headerLogo: {
+    width: 42, // DP, DIP
+    height: 42,
   },
   loginButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: "black",
-    borderRadius: 10,
     position: "absolute",
-    right: 16,
+    right: 20,
+    top: 0,
+    backgroundColor: "black",
     borderWidth: 1,
+    borderColor: "black",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
   },
   loginButtonText: {
     color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
+  },
+  menuButton: {
+    position: "absolute",
+    left: 20,
+    top: 10,
   },
 });

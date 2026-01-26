@@ -1,61 +1,77 @@
 import { Ionicons } from "@expo/vector-icons";
-import { router, Tabs } from "expo-router";
-import { useRef, useState } from "react";
-import { Modal, Pressable, Text, View, Animated } from "react-native";
 import { type BottomTabBarButtonProps } from "@react-navigation/bottom-tabs";
+import { Tabs, useRouter } from "expo-router";
+import { useContext, useRef, useState } from "react";
+import {
+  Modal,
+  View,
+  Text,
+  TouchableOpacity,
+  Animated,
+  Pressable,
+} from "react-native";
+import { AuthContext } from "../_layout";
 
-export default function TabsLayout() {
-  const isLoggedIn = true;
+const AnimatedTabBarButton = ({
+  children,
+  onPress,
+  style,
+  ...restProps
+}: BottomTabBarButtonProps) => {
+  const scaleValue = useRef(new Animated.Value(1)).current;
+
+  const handlePressOut = () => {
+    Animated.sequence([
+      Animated.spring(scaleValue, {
+        toValue: 1.15,
+        useNativeDriver: true,
+        speed: 300,
+      }),
+      Animated.spring(scaleValue, {
+        toValue: 1.05,
+        useNativeDriver: true,
+        speed: 300,
+      }),
+    ]).start();
+  };
+
+  return (
+    <Pressable
+      {...(restProps as any)}
+      onPress={onPress}
+      onPressOut={handlePressOut}
+      style={[
+        { flex: 1, justifyContent: "center", alignItems: "center" },
+        style,
+      ]}
+      // Disable Android ripple effect
+      android_ripple={{ borderless: false, radius: 0 }}
+    >
+      <Animated.View style={{ transform: [{ scale: scaleValue }] }}>
+        {children}
+      </Animated.View>
+    </Pressable>
+  );
+};
+
+export default function TabLayout() {
+  const router = useRouter();
+  const { user } = useContext(AuthContext);
+  const isLoggedIn = !!user;
+  console.log("user", user, "isLoggedIn", isLoggedIn);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
   const openLoginModal = () => {
     setIsLoginModalOpen(true);
   };
+
   const closeLoginModal = () => {
     setIsLoginModalOpen(false);
   };
 
-  const AnimatedTabBarButton = ({
-    children,
-    onPress,
-    style,
-    ...restProps
-  }: BottomTabBarButtonProps) => {
-    const scaleValue = useRef(new Animated.Value(1)).current;
-    const handlePressOut = () => {
-      Animated.sequence([
-        Animated.spring(scaleValue, {
-          toValue: 1.15,
-          useNativeDriver: true,
-          speed: 300,
-        }),
-        Animated.spring(scaleValue, {
-          toValue: 1,
-          useNativeDriver: true,
-          speed: 300,
-        }),
-      ]).start();
-    };
-
-    return (
-      <Pressable
-        {...(restProps as any)}
-        onPress={onPress}
-        onPressOut={handlePressOut}
-        style={[
-          {
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: "red",
-          },
-          style,
-        ]}
-      >
-        <Animated.View style={{ transform: [{ scale: scaleValue }] }}>
-          {children}
-        </Animated.View>
-      </Pressable>
-    );
+  const toLoginPage = () => {
+    setIsLoginModalOpen(false);
+    router.push("/login");
   };
 
   return (
@@ -63,40 +79,19 @@ export default function TabsLayout() {
       <Tabs
         backBehavior="history"
         screenOptions={{
-          tabBarButton: (props) => <AnimatedTabBarButton {...props} />,
           headerShown: false,
-          tabBarShowLabel: false,
-          tabBarStyle: {
-            display: "flex",
-            backgroundColor: "black",
-            borderTopWidth: 0,
-            height: 80,
-            paddingTop: 10,
-            paddingBottom: 10,
-            paddingHorizontal: 20,
-            borderRadius: 100,
-            overflow: "hidden",
-            position: "absolute",
-            marginHorizontal: 20,
-            marginBottom: 20,
-          },
-          tabBarItemStyle: {
-            justifyContent: "center",
-            alignItems: "center",
-            height: "100%",
-            paddingVertical: 10,
-          },
+          tabBarButton: (props) => <AnimatedTabBarButton {...props} />,
         }}
       >
         <Tabs.Screen
           name="(home)"
           options={{
-            title: "Home",
-            tabBarIcon: ({ color, size, focused }) => (
+            tabBarLabel: () => null,
+            tabBarIcon: ({ focused }) => (
               <Ionicons
-                name={focused ? "home" : "home-outline"}
-                color={focused ? "white" : color}
-                size={size}
+                name="home"
+                size={24}
+                color={focused ? "black" : "gray"}
               />
             ),
           }}
@@ -104,20 +99,21 @@ export default function TabsLayout() {
         <Tabs.Screen
           name="search"
           options={{
-            title: "Search",
-            tabBarIcon: ({ color, size, focused }) => (
+            tabBarLabel: () => null,
+            tabBarIcon: ({ focused }) => (
               <Ionicons
-                name={focused ? "search" : "search-sharp"}
-                color={focused ? "white" : color}
-                size={size}
+                name="search"
+                size={24}
+                color={focused ? "black" : "gray"}
               />
             ),
           }}
         />
         <Tabs.Screen
           name="add"
-          listeners={() => ({
+          listeners={{
             tabPress: (e) => {
+              console.log("tabPress");
               e.preventDefault();
               if (isLoggedIn) {
                 router.navigate("/modal");
@@ -125,11 +121,15 @@ export default function TabsLayout() {
                 openLoginModal();
               }
             },
-          })}
+          }}
           options={{
-            title: "Add",
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="add" color={color} size={size} />
+            tabBarLabel: () => null,
+            tabBarIcon: ({ focused }) => (
+              <Ionicons
+                name="add"
+                size={24}
+                color={focused ? "black" : "gray"}
+              />
             ),
           }}
         />
@@ -144,12 +144,12 @@ export default function TabsLayout() {
             },
           }}
           options={{
-            title: "Activity",
-            tabBarIcon: ({ color, size, focused }) => (
+            tabBarLabel: () => null,
+            tabBarIcon: ({ focused }) => (
               <Ionicons
-                name={focused ? "heart" : "heart-outline"}
-                color={focused ? "white" : color}
-                size={size}
+                name="heart-outline"
+                size={24}
+                color={focused ? "black" : "gray"}
               />
             ),
           }}
@@ -165,12 +165,12 @@ export default function TabsLayout() {
             },
           }}
           options={{
-            title: "User",
-            tabBarIcon: ({ color, size, focused }) => (
+            tabBarLabel: () => null,
+            tabBarIcon: ({ focused }) => (
               <Ionicons
-                name={focused ? "person" : "person-outline"}
-                color={focused ? "white" : color}
-                size={size}
+                name="person-outline"
+                size={24}
+                color={focused ? "black" : "gray"}
               />
             ),
           }}
@@ -178,7 +178,6 @@ export default function TabsLayout() {
         <Tabs.Screen
           name="(post)/[username]/post/[postID]"
           options={{
-            title: "Post",
             href: null,
           }}
         />
@@ -187,33 +186,21 @@ export default function TabsLayout() {
         visible={isLoginModalOpen}
         transparent={true}
         animationType="slide"
-        onRequestClose={closeLoginModal}
       >
         <View
           style={{
             flex: 1,
             justifyContent: "flex-end",
-            width: "100%",
-            height: "100%",
             backgroundColor: "rgba(0, 0, 0, 0.5)",
           }}
         >
-          <View
-            style={{
-              backgroundColor: "white",
-              padding: 20,
-              borderTopLeftRadius: 10,
-              borderTopRightRadius: 10,
-              width: "100%",
-              height: "50%",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Text>Login 하세요.</Text>
-            <Pressable onPress={closeLoginModal}>
-              <Text>Close</Text>
+          <View style={{ backgroundColor: "white", padding: 20 }}>
+            <Pressable onPress={toLoginPage}>
+              <Text>Login Modal</Text>
             </Pressable>
+            <TouchableOpacity onPress={closeLoginModal}>
+              <Ionicons name="close" size={24} color="#555" />
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
