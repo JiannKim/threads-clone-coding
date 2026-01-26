@@ -16,6 +16,7 @@ import { useRouter } from "expo-router";
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Location from "expo-location";
+import * as ImagePicker from "expo-image-picker";
 
 interface Thread {
   id: string;
@@ -42,7 +43,9 @@ export function ListFooter({
       </View>
       <View>
         <Pressable onPress={addThread} style={styles.input}>
-          <Text style={{ color: canAddThread ? "#999" : "#ccc", paddingBottom: 4 }}>
+          <Text
+            style={{ color: canAddThread ? "#999" : "#ccc", paddingBottom: 4 }}
+          >
             스레드에 추가
           </Text>
         </Pressable>
@@ -59,7 +62,9 @@ export default function Modal() {
   const [topicText, setTopicText] = useState("");
   const inputRefs = useRef<{ [key: string]: TextInput | null }>({});
   const flatListRef = useRef<FlatList>(null);
-  const [newlyAddedThreadId, setNewlyAddedThreadId] = useState<string | null>(null);
+  const [newlyAddedThreadId, setNewlyAddedThreadId] = useState<string | null>(
+    null
+  );
   const insets = useSafeAreaInsets();
   const [replyOption, setReplyOption] = useState("Anyone");
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
@@ -74,6 +79,7 @@ export default function Modal() {
 
   const handlePost = () => {};
 
+  // 스레드 텍스트 업데이트
   const updateThreadText = (id: string, text: string) => {
     setThreads((prevThreads) =>
       prevThreads.map((thread) =>
@@ -89,18 +95,91 @@ export default function Modal() {
 
   const addLocationToThread = (id: string, location: [number, number]) => {};
 
+  // 스레드 삭제
   const removeThread = (id: string) => {
     setThreads((prevThreads) =>
       prevThreads.filter((thread) => thread.id !== id)
     );
   };
 
-  const pickImage = async (id: string) => {};
+  // 갤러리 권한 요청
+  const pickImage = async (id: string) => {
+    let { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert(
+        "Image permission not granted",
+        "Please grant image permission to use this feature",
+        [
+          {
+            text: "Open settings",
+            onPress: () => {
+              Linking.openSettings();
+            },
+          },
+          {
+            text: "Cancel",
+          },
+        ]
+      );
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images", "videos","livePhotos"],
+      allowsMultipleSelection: true,
+      selectionLimit: 5,
+    });
+    if (!result.canceled) {
+      setThreads((prevThreads) =>
+        prevThreads.map((thread) =>
+          thread.id === id ? { ...thread, imageUris: thread.imageUris.concat(result.assets?.map((asset) => asset.uri) ?? []) } : thread
+        )
+      );
+    }
+  };
 
-  const takePhoto = async (id: string) => {};
+  // 카메라 권한 요청
+  const takePhoto = async (id: string) => {
+    let { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert(
+        "Camera permission not granted",
+        "Please grant camera permission to use this feature",
+        [
+          {
+            text: "Open settings",
+            onPress: () => {
+              Linking.openSettings();
+            },
+          },
+          {
+            text: "Cancel",
+          },
+        ]
+      );
+      return;
+    }
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ["images", "videos", "livePhotos"],
+    });
+    if (!result.canceled) {
+      setThreads((prevThreads) =>
+        prevThreads.map((thread) =>
+          thread.id === id ? { ...thread, imageUris: thread.imageUris.concat(result.assets?.map((asset) => asset.uri) ?? []) } : thread
+        )
+      );
+    }
+  };
 
-  const removeImageFromThread = (id: string, uriToRemove: string) => {};
+  // 이미지 삭제
+  const removeImageFromThread = (id: string, uriToRemove: string) => {
+    setThreads((prevThreads) =>
+      prevThreads.map((thread) =>
+        thread.id === id ? { ...thread, imageUris: thread.imageUris.filter((uri) => uri !== uriToRemove) } : thread
+      )
+    );
+  };
 
+  // 위치 권한 요청
   const getMyLocation = async (id: string) => {
     let { status } = await Location.requestForegroundPermissionsAsync();
     console.log("getMyLocation", status);
@@ -123,6 +202,7 @@ export default function Modal() {
       return;
     }
 
+    // 위치 정보 가져오기
     const location = await Location.getCurrentPositionAsync({});
 
     setThreads((prevThreads) =>
@@ -143,7 +223,7 @@ export default function Modal() {
       setTimeout(() => {
         flatListRef.current?.scrollToEnd({ animated: true });
       }, 50);
-      
+
       setTimeout(() => {
         inputRefs.current[newlyAddedThreadId]?.focus();
         setNewlyAddedThreadId(null);
@@ -170,29 +250,43 @@ export default function Modal() {
         <View style={styles.userInfoContainer}>
           <View style={styles.userInfoUsernameContainer}>
             <Text style={styles.username}>dominica.world</Text>
-            <Ionicons name="chevron-forward-outline" size={14} color="#8e8e93" />
+            <Ionicons
+              name="chevron-forward-outline"
+              size={14}
+              color="#8e8e93"
+            />
             {index === 0 ? (
               <View style={styles.topicContainer}>
-                <TextInput style={styles.topicText} value={topicText} onChangeText={(text) => setTopicText(text)} placeholder="주제 추가"
+                <TextInput
+                  style={styles.topicText}
+                  value={topicText}
+                  onChangeText={(text) => setTopicText(text)}
+                  placeholder="주제 추가"
                   placeholderTextColor="#999"
                   multiline={false}
-              />
+                />
                 {threads.length > 1 && (
-                  <Text style={styles.topicIndexLabel}>{index + 1 }/{threads.length}</Text>
+                  <Text style={styles.topicIndexLabel}>
+                    {index + 1}/{threads.length}
+                  </Text>
                 )}
               </View>
             ) : (
               <View style={styles.topicContainer}>
-                <Text style={[styles.topicText, { color: "#8e8e93" }]}>{topicText}</Text>
+                <Text style={[styles.topicText, { color: "#8e8e93" }]}>
+                  {topicText}
+                </Text>
                 {threads.length > 1 && (
-                  <Text style={styles.topicIndexLabel}>{index + 1 }/{threads.length}</Text>
+                  <Text style={styles.topicIndexLabel}>
+                    {index + 1}/{threads.length}
+                  </Text>
                 )}
               </View>
             )}
           </View>
           {index > 0 && (
             <Pressable
-            onPress={() => removeThread(item.id)}
+              onPress={() => removeThread(item.id)}
               style={styles.removeButton}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
@@ -200,28 +294,28 @@ export default function Modal() {
             </Pressable>
           )}
         </View>
-        { index === 0 ? (
-            <TextInput
-              style={styles.input}
-              placeholder={"새로운 소식이 있나요?"}
-              placeholderTextColor="#999"
-              value={item.text}
-              onChangeText={(text) => updateThreadText(item.id, text)}
-              multiline
-            />
-        ) : 
-        <TextInput
-          ref={(ref) => {
-            inputRefs.current[item.id] = ref;
-          }}
-          style={styles.input}
-          placeholder={"내용을 더 추가해보세요..."}
-          placeholderTextColor="#999"
-          value={item.text}
-          onChangeText={(text) => updateThreadText(item.id, text)}
-          multiline
+        {index === 0 ? (
+          <TextInput
+            style={styles.input}
+            placeholder={"새로운 소식이 있나요?"}
+            placeholderTextColor="#999"
+            value={item.text}
+            onChangeText={(text) => updateThreadText(item.id, text)}
+            multiline
           />
-        }
+        ) : (
+          <TextInput
+            ref={(ref) => {
+              inputRefs.current[item.id] = ref;
+            }}
+            style={styles.input}
+            placeholder={"내용을 더 추가해보세요..."}
+            placeholderTextColor="#999"
+            value={item.text}
+            onChangeText={(text) => updateThreadText(item.id, text)}
+            multiline
+          />
+        )}
         {item.imageUris && item.imageUris.length > 0 && (
           <FlatList
             data={item.imageUris}
@@ -318,7 +412,7 @@ export default function Modal() {
         style={styles.list}
         contentContainerStyle={{
           backgroundColor: "#fff",
-         }}
+        }}
         keyboardShouldPersistTaps="handled"
       />
 
