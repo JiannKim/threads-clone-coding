@@ -20,6 +20,7 @@ const AnimatedTabBarButton = ({
   ...restProps
 }: BottomTabBarButtonProps) => {
   const scaleValue = useRef(new Animated.Value(1)).current;
+  const { ref: _ref, ...pressableProps } = restProps;
 
   const handlePressOut = () => {
     Animated.sequence([
@@ -38,7 +39,7 @@ const AnimatedTabBarButton = ({
 
   return (
     <Pressable
-      {...restProps}
+      {...pressableProps}
       onPress={onPress}
       onPressOut={handlePressOut}
       style={[

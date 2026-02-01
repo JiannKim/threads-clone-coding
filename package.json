@@ -55,6 +55,7 @@
     "eslint-config-expo": "~10.0.0",
     "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-import": "^2.32.0",
+    "expo-module-scripts": "^5.0.8",
     "prettier": "^3.8.0",
     "typescript": "~5.9.2"
   },
