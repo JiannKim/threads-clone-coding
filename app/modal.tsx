@@ -88,8 +88,12 @@ export default function Modal() {
     );
   };
 
-  const canAddThread = (threads.at(-1)?.text.trim().length ?? 0) > 0 || (threads.at(-1)?.imageUris.length ?? 0) > 0;
-  const canPost = threads.every((thread) => thread.text.trim().length > 0 || thread.imageUris.length > 0);
+  const canAddThread =
+    (threads.at(-1)?.text.trim().length ?? 0) > 0 ||
+    (threads.at(-1)?.imageUris.length ?? 0) > 0;
+  const canPost = threads.every(
+    (thread) => thread.text.trim().length > 0 || thread.imageUris.length > 0
+  );
 
   const addImageToThread = (id: string, uri: string) => {};
 
@@ -124,14 +128,21 @@ export default function Modal() {
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images", "videos","livePhotos"],
+      mediaTypes: ["images", "videos", "livePhotos"],
       allowsMultipleSelection: true,
       selectionLimit: 5,
     });
     if (!result.canceled) {
       setThreads((prevThreads) =>
         prevThreads.map((thread) =>
-          thread.id === id ? { ...thread, imageUris: thread.imageUris.concat(result.assets?.map((asset) => asset.uri) ?? []) } : thread
+          thread.id === id
+            ? {
+                ...thread,
+                imageUris: thread.imageUris.concat(
+                  result.assets?.map((asset) => asset.uri) ?? []
+                ),
+              }
+            : thread
         )
       );
     }
@@ -164,7 +175,14 @@ export default function Modal() {
     if (!result.canceled) {
       setThreads((prevThreads) =>
         prevThreads.map((thread) =>
-          thread.id === id ? { ...thread, imageUris: thread.imageUris.concat(result.assets?.map((asset) => asset.uri) ?? []) } : thread
+          thread.id === id
+            ? {
+                ...thread,
+                imageUris: thread.imageUris.concat(
+                  result.assets?.map((asset) => asset.uri) ?? []
+                ),
+              }
+            : thread
         )
       );
     }
@@ -174,7 +192,12 @@ export default function Modal() {
   const removeImageFromThread = (id: string, uriToRemove: string) => {
     setThreads((prevThreads) =>
       prevThreads.map((thread) =>
-        thread.id === id ? { ...thread, imageUris: thread.imageUris.filter((uri) => uri !== uriToRemove) } : thread
+        thread.id === id
+          ? {
+              ...thread,
+              imageUris: thread.imageUris.filter((uri) => uri !== uriToRemove),
+            }
+          : thread
       )
     );
   };
@@ -429,7 +452,9 @@ export default function Modal() {
           <View
             style={[styles.dropdownContainer, { bottom: insets.bottom + 30 }]}
           >
-            <Text style={styles.dropdownTitle}>답글을 달고 인용할 수 있는 사람</Text>
+            <Text style={styles.dropdownTitle}>
+              답글을 달고 인용할 수 있는 사람
+            </Text>
             {replyOptions.map((option) => (
               <Pressable
                 key={option}

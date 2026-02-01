@@ -3,18 +3,23 @@ import { Stack } from "expo-router";
 import { createContext, useContext, useEffect, useState } from "react";
 import { Alert } from "react-native";
 import * as SecureStore from "expo-secure-store";
+import { StatusBar } from "expo-status-bar";
 
-interface User {
+export interface User {
   id: string;
   name: string;
   profileImageUrl: string;
   description: string;
+  link?: string;
+  showInstagramBadge?: boolean;
+  isPrivate?: boolean;
 }
 
 export const AuthContext = createContext<{
   user: User | null;
   login?: () => Promise<any>;
   logout?: () => Promise<any>;
+  updateUser?: (user: User) => void;
 }>({
   user: null,
 });
@@ -27,7 +32,7 @@ export default function RootLayout() {
     return fetch("/login", {
       method: "POST",
       body: JSON.stringify({
-        username: "jiahnkim",
+        username: "zerocho",
         password: "1234",
       }),
     })
@@ -59,6 +64,11 @@ export default function RootLayout() {
     ]);
   };
 
+  const updateUser = (user: User) => {
+    setUser(user);
+    AsyncStorage.setItem("user", JSON.stringify(user));
+  };
+
   useEffect(() => {
     AsyncStorage.getItem("user").then((user) => {
       setUser(user ? JSON.parse(user) : null);
@@ -67,7 +77,8 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <AuthContext value={{ user, login, logout }}>
+    <AuthContext value={{ user, login, logout, updateUser }}>
+      <StatusBar style="auto" />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="modal" options={{ presentation: "modal" }} />

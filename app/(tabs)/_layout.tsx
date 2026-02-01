@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   Animated,
   Pressable,
+  useColorScheme,
 } from "react-native";
 import { AuthContext } from "../_layout";
 
@@ -23,21 +24,21 @@ const AnimatedTabBarButton = ({
   const handlePressOut = () => {
     Animated.sequence([
       Animated.spring(scaleValue, {
-        toValue: 1.15,
+        toValue: 1.2,
         useNativeDriver: true,
-        speed: 300,
+        speed: 200,
       }),
       Animated.spring(scaleValue, {
-        toValue: 1.05,
+        toValue: 1,
         useNativeDriver: true,
-        speed: 300,
+        speed: 200,
       }),
     ]).start();
   };
 
   return (
     <Pressable
-      {...(restProps as any)}
+      {...restProps}
       onPress={onPress}
       onPressOut={handlePressOut}
       style={[
@@ -58,7 +59,7 @@ export default function TabLayout() {
   const router = useRouter();
   const { user } = useContext(AuthContext);
   const isLoggedIn = !!user;
-  console.log("user", user, "isLoggedIn", isLoggedIn);
+  const colorScheme = useColorScheme();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   const openLoginModal = () => {
@@ -80,6 +81,10 @@ export default function TabLayout() {
         backBehavior="history"
         screenOptions={{
           headerShown: false,
+          tabBarStyle: {
+            backgroundColor: colorScheme === "dark" ? "#101010" : "white",
+            borderTopWidth: 0,
+          },
           tabBarButton: (props) => <AnimatedTabBarButton {...props} />,
         }}
       >
@@ -91,7 +96,13 @@ export default function TabLayout() {
               <Ionicons
                 name="home"
                 size={24}
-                color={focused ? "black" : "gray"}
+                color={
+                  focused
+                    ? colorScheme === "dark"
+                      ? "white"
+                      : "black"
+                    : "gray"
+                }
               />
             ),
           }}
@@ -104,7 +115,13 @@ export default function TabLayout() {
               <Ionicons
                 name="search"
                 size={24}
-                color={focused ? "black" : "gray"}
+                color={
+                  focused
+                    ? colorScheme === "dark"
+                      ? "white"
+                      : "black"
+                    : "gray"
+                }
               />
             ),
           }}
@@ -128,7 +145,13 @@ export default function TabLayout() {
               <Ionicons
                 name="add"
                 size={24}
-                color={focused ? "black" : "gray"}
+                color={
+                  focused
+                    ? colorScheme === "dark"
+                      ? "white"
+                      : "black"
+                    : "gray"
+                }
               />
             ),
           }}
@@ -149,7 +172,13 @@ export default function TabLayout() {
               <Ionicons
                 name="heart-outline"
                 size={24}
-                color={focused ? "black" : "gray"}
+                color={
+                  focused
+                    ? colorScheme === "dark"
+                      ? "white"
+                      : "black"
+                    : "gray"
+                }
               />
             ),
           }}
@@ -170,7 +199,13 @@ export default function TabLayout() {
               <Ionicons
                 name="person-outline"
                 size={24}
-                color={focused ? "black" : "gray"}
+                color={
+                  focused
+                    ? colorScheme === "dark"
+                      ? "white"
+                      : "black"
+                    : "gray"
+                }
               />
             ),
           }}

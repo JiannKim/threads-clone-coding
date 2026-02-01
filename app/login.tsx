@@ -19,7 +19,7 @@ export default function Login() {
       <Pressable style={styles.backButton} onPress={() => router.back()}>
         <Text>Back</Text>
       </Pressable>
-      <View style={styles.loginButtonContainer}> 
+      <View style={styles.loginButtonContainer}>
         <Pressable style={styles.loginButton} onPress={login}>
           <Text style={styles.loginButtonText}>Login</Text>
         </Pressable>
