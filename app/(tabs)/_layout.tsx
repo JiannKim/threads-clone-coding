@@ -171,7 +171,7 @@ export default function TabLayout() {
             tabBarLabel: () => null,
             tabBarIcon: ({ focused }) => (
               <Ionicons
-                name="heart-outline"
+                name={focused ? "heart" : "heart-outline"}
                 size={24}
                 color={
                   focused
