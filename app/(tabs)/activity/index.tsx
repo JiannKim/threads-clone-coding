@@ -12,10 +12,33 @@ import { usePathname, useRouter } from "expo-router";
 import NotFound from "../../+not-found";
 import { Ionicons } from "@expo/vector-icons";
 import SideMenu from "../../../components/SideMenu";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../_layout";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ActivityItem from "../../../components/Activity";
+
+type ActivityItemData = {
+  id: string;
+  username: string;
+  avatar: string;
+  timeAgo: string;
+  content: string;
+  type: string;
+  postId?: string;
+  otherCount?: number;
+  likes?: number;
+  reply?: string;
+};
+
+const pathnameToType: Record<string, string> = {
+  "/activity": "all",
+  "/activity/follows": "follows",
+  "/activity/replies": "replies",
+  "/activity/mentions": "mentions",
+  "/activity/quotes": "quotes",
+  "/activity/reposts": "reposts",
+  "/activity/verified": "verified",
+};
 
 export default function Index() {
   const router = useRouter();
@@ -25,6 +48,23 @@ export default function Index() {
   const colorScheme = useColorScheme();
   const isLoggedIn = !!user;
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
+  const [activities, setActivities] = useState<ActivityItemData[]>([]);
+
+  useEffect(() => {
+    const typeParam = pathnameToType[pathname] || "all";
+    const fetchActivities = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:3000/activity?type=${typeParam}`
+        );
+        const data = await response.json();
+        setActivities(data.activities ?? []);
+      } catch (error) {
+        console.error("활동 목록 조회 실패", error);
+      }
+    };
+    fetchActivities();
+  }, [pathname]);
 
   if (
     ![
@@ -77,7 +117,12 @@ export default function Index() {
           onClose={() => setIsSideMenuOpen(false)}
         />
       </View>
-      <View style={styles.tabBar}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.tabBarScroll}
+        contentContainerStyle={styles.tabBarContent}
+      >
         <View>
           <TouchableOpacity
             style={[
@@ -260,61 +305,23 @@ export default function Index() {
             </Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </ScrollView>
       <ScrollView>
-        <ActivityItem
-          id="1"
-          username="John Doe"
-          timeAgo="1h"
-          content="팔로우"
-          type="followed"
-          avatar="https://randomuser.me/api/portraits/men/1.jpg"
-        />
-        <ActivityItem
-          id="2"
-          username="John Doe"
-          timeAgo="1h"
-          postId="1"
-          content="Hello, comment!"
-          type="reply"
-          avatar="https://randomuser.me/api/portraits/men/1.jpg"
-        />
-        <ActivityItem
-          id="2"
-          username="John Doe"
-          timeAgo="1h"
-          postId="1"
-          content="liked your post"
-          type="like"
-          avatar="https://randomuser.me/api/portraits/men/1.jpg"
-        />
-        <ActivityItem
-          id="3"
-          username="John Doe"
-          timeAgo="1h"
-          postId="1"
-          content="reposted your post"
-          type="repost"
-          avatar="https://randomuser.me/api/portraits/men/1.jpg"
-        />
-        <ActivityItem
-          id="5"
-          username="John Doe"
-          timeAgo="1h"
-          postId="1"
-          content="mentioned you"
-          type="mention"
-          avatar="https://randomuser.me/api/portraits/men/1.jpg"
-        />
-        <ActivityItem
-          id="4"
-          username="John Doe"
-          timeAgo="1h"
-          postId="1"
-          content="quoted your post"
-          type="quote"
-          avatar="https://randomuser.me/api/portraits/men/1.jpg"
-        />
+        {activities.map((activity) => (
+          <ActivityItem
+            key={activity.id}
+            id={activity.id}
+            username={activity.username}
+            timeAgo={activity.timeAgo}
+            content={activity.content}
+            type={activity.type}
+            avatar={activity.avatar}
+            postId={activity.postId}
+            otherCount={activity.otherCount}
+            likes={activity.likes}
+            reply={activity.reply}
+          />
+        ))}
       </ScrollView>
     </View>
   );
@@ -377,9 +384,16 @@ const styles = StyleSheet.create({
   tabButtonTextDark: {
     color: "white",
   },
-  tabBar: {
+  tabBarScroll: {
+    height: 60,
+    position: "relative",
+    top: 0,
+    left: 0,
+    right: 0,
+  },
+  tabBarContent: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 10,
   },
   logo: {

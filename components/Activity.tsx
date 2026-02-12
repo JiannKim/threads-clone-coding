@@ -46,7 +46,7 @@ export default function ActivityItem({
   let IconComponent: any = FontAwesome;
 
   if (type === "follow" || type === "followed") {
-    iconColor = "#FF9500";
+    iconColor = "#6e3cef";
     iconName = "person";
     IconComponent = Ionicons;
   } else if (type === "mention") {
@@ -95,7 +95,7 @@ export default function ActivityItem({
       <Pressable onPress={handleAvatarPress} style={styles.avatarContainer}>
         <Image source={{ uri: avatar }} style={styles.avatar} />
         <View style={[styles.iconCircle, { backgroundColor: iconColor }]}>
-          <IconComponent name={iconName} size={12} color="white" />
+          <IconComponent name={iconName} size={10} color="white" />
         </View>
       </Pressable>
 
@@ -112,7 +112,9 @@ export default function ActivityItem({
           >
             {username}
           </Text>
-          {otherCount && <Text style={styles.otherCount}>+{otherCount}명</Text>}
+          {otherCount && (
+            <Text style={styles.otherCount}>+{otherCount}f명</Text>
+          )}
           <Text
             style={[
               styles.timeAgo,
@@ -187,9 +189,8 @@ export default function ActivityItem({
 const styles = StyleSheet.create({
   activityItemContainer: {
     flexDirection: "row",
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    paddingTop: 16,
+    paddingLeft: 16,
     alignItems: "flex-start",
   },
   avatarContainer: {
@@ -200,21 +201,26 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#222",
   },
   iconCircle: {
-    width: 20,
-    height: 20,
+    width: 22,
+    height: 22,
     borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
     position: "absolute",
-    bottom: -2,
-    right: -2,
+    bottom: -6,
+    right: -4,
     borderWidth: 2,
-    borderColor: "#fff",
+    borderColor: "#101010",
   },
   activityContent: {
     flex: 1,
+    paddingBottom: 8, 
+    borderBottomWidth: 1,
+    borderBottomColor: "#333",
   },
   activityHeader: {
     flexDirection: "row",
@@ -235,6 +241,7 @@ const styles = StyleSheet.create({
   otherCount: {
     fontSize: 14,
     marginRight: 4,
+    color: "#888",
   },
   otherCountDark: {
     color: "white",

@@ -87,6 +87,32 @@ if (__DEV__) {
         followers: () => faker.number.int({ min: 10, max: 5000 }),
         isVerified: () => faker.helpers.arrayElement([true, false]),
       }),
+      activity: Factory.extend({
+        type: () =>
+          faker.helpers.arrayElement([
+            "followed",
+            "reply",
+            "like",
+            "repost",
+            "mention",
+            "quote",
+            "verified",
+          ]),
+        content: () => faker.lorem.sentence(),
+        timeAgo: () =>
+          faker.helpers.arrayElement(["1h", "2h", "5m", "1d", "3d", "1w"]),
+        postId: () =>
+          Math.random() > 0.3 ? faker.string.numeric(6) : undefined,
+        otherCount: () =>
+          Math.random() > 0.7
+            ? faker.number.int({ min: 1, max: 10 })
+            : undefined,
+        likes: () =>
+          Math.random() > 0.5
+            ? faker.number.int({ min: 1, max: 100 })
+            : undefined,
+        reply: () => (Math.random() > 0.7 ? faker.lorem.sentence() : undefined),
+      }),
     },
     seeds(server) {
       zerocho = server.create("user", {
@@ -102,6 +128,11 @@ if (__DEV__) {
         });
       });
       server.createList("search", 10);
+
+      const usersForActivity = server.schema.all("user").models;
+      usersForActivity.forEach((user: any) => {
+        server.createList("activity", 3, { user });
+      });
     },
     routes() {
       this.post("/posts", (schema, request) => {
@@ -147,6 +178,47 @@ if (__DEV__) {
         const post = schema.find("post", request.params.id);
         const comments = schema.all("post").models.slice(0, 10);
         return new Response(200, {}, { post, comments });
+      });
+
+      this.get("/activity", (schema: any, request) => {
+        const typeFilter = (request.queryParams.type as string) || "all";
+        let activities = schema.all("activity").models;
+
+        const typeMap: Record<string, string> = {
+          follows: "followed",
+          replies: "reply",
+          mentions: "mention",
+          quotes: "quote",
+          reposts: "repost",
+          verified: "verified",
+        };
+
+        if (typeFilter !== "all") {
+          const targetType = typeMap[typeFilter] || typeFilter;
+          activities = activities.filter(
+            (a: any) => a.attrs.type === targetType
+          );
+        }
+
+        const result = activities.map((activity: any) => {
+          const user = activity.user;
+          return {
+            id: activity.id,
+            username: user?.attrs?.id ?? "unknown",
+            avatar:
+              user?.attrs?.profileImageUrl ??
+              "https://avatars.githubusercontent.com/u/1?v=4",
+            timeAgo: activity.attrs.timeAgo,
+            content: activity.attrs.content,
+            type: activity.attrs.type,
+            postId: activity.attrs.postId,
+            otherCount: activity.attrs.otherCount,
+            likes: activity.attrs.likes,
+            reply: activity.attrs.reply,
+          };
+        });
+
+        return new Response(200, {}, { activities: result });
       });
 
       this.post("/login", (schema, request) => {
