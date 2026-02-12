@@ -7,14 +7,13 @@ import {
   TextInput,
   useColorScheme,
   Image,
+  ScrollView,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../_layout";
 import SideMenu from "../../components/SideMenu";
 import { router } from "expo-router";
-import { faker } from "@faker-js/faker";
-import { createServer, Model } from "miragejs";
 
 const lightTheme = {
   backgroundWhite: "white",
@@ -43,40 +42,11 @@ type SearchUser = {
   id: string;
   name: string;
   username: string;
+  profileImageUrl: string;
   bio: string;
   followers: number;
   isVerified: boolean;
 };
-
-function createDummyUsersWithMirage(): SearchUser[] {
-  const server = createServer({
-    models: {
-      searchUser: Model,
-    },
-    seeds(server) {
-      for (let i = 0; i < 4; i += 1) {
-        server.create("searchUser", {
-          id: faker.string.uuid(),
-          name: faker.person.firstName(),
-          username: faker.internet.username().toLowerCase(),
-          bio: faker.lorem.sentence(),
-          followers: faker.number.int({ min: 10, max: 5000 }),
-          isVerified: faker.helpers.arrayElement([true, false]),
-        });
-      }
-    },
-  });
-
-  const users =
-    server.schema!.all("searchUser").models.map((model: any) => model.attrs) ??
-    [];
-
-  server.shutdown();
-
-  return users as SearchUser[];
-}
-
-const DUMMY_USERS: SearchUser[] = createDummyUsersWithMirage();
 
 export default function Index() {
   const insets = useSafeAreaInsets();
@@ -86,7 +56,25 @@ export default function Index() {
   const [searchQuery, setSearchQuery] = useState("");
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
-  const users = DUMMY_USERS;
+  const [users, setUsers] = useState<SearchUser[]>([]);
+  const [isLoading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:3000/search?q=${searchQuery}`
+        );
+        const data = await response.json();
+        setUsers(data.users);
+      } catch (error) {
+        console.error("검색 실패", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUsers();
+  }, [searchQuery]);
 
   return (
     <View
@@ -175,7 +163,10 @@ export default function Index() {
           />
         </View>
       </View>
-      <View style={styles.searchResults}>
+      <ScrollView
+        style={styles.searchResults}
+        keyboardShouldPersistTaps="handled"
+      >
         <Text
           style={[
             styles.searchResultsTitle,
@@ -185,14 +176,14 @@ export default function Index() {
           팔로우 추천
         </Text>
         <View style={styles.searchResultsList}>
-          {users.map((u) => (
+          {users.map((searchUser) => (
             <Pressable
-              key={u.id}
+              key={searchUser.id}
               onPress={() => router.push(`/profile`)}
               style={styles.searchResultsItemContainer}
             >
               <Image
-                source={require("../../assets/images/react-logo.png")}
+                source={{ uri: searchUser.profileImageUrl }}
                 style={styles.searchResultsItemImage}
               />
               <View style={styles.searchResultsItemName}>
@@ -209,9 +200,9 @@ export default function Index() {
                           },
                         ]}
                       >
-                        {u.username}
+                        {searchUser.username}
                       </Text>
-                      {u.isVerified && (
+                      {searchUser.isVerified && (
                         <View style={styles.searchResultsItemNameVerifiedIcon}>
                           <Ionicons
                             name="checkmark-sharp"
@@ -235,7 +226,7 @@ export default function Index() {
                         },
                       ]}
                     >
-                      {u.name}
+                      {searchUser.name}
                     </Text>
                   </View>
                   <Pressable
@@ -270,7 +261,7 @@ export default function Index() {
                     },
                   ]}
                 >
-                  {u.bio}
+                  {searchUser.bio}
                 </Text>
                 <View>
                   <Text
@@ -283,14 +274,14 @@ export default function Index() {
                       },
                     ]}
                   >
-                    팔로워 {u.followers}명
+                    팔로워 {searchUser.followers}명
                   </Text>
                 </View>
               </View>
             </Pressable>
           ))}
         </View>
-      </View>
+      </ScrollView>
     </View>
   );
 }

@@ -27,12 +27,16 @@ if (__DEV__) {
   }
 
   window.server = createServer({
+    urlPrefix: "http://localhost:3000",
     models: {
       user: Model.extend({
         posts: hasMany("post"),
         activities: hasMany("activity"),
       }),
       post: Model.extend({
+        user: belongsTo("user"),
+      }),
+      search: Model.extend({
         user: belongsTo("user"),
       }),
       activity: Model.extend({
@@ -71,6 +75,18 @@ if (__DEV__) {
         comments: () => Math.floor(Math.random() * 100),
         reposts: () => Math.floor(Math.random() * 100),
       }),
+      search: Factory.extend({
+        id: () => faker.string.uuid(),
+        name: () => faker.person.firstName(),
+        username: () => faker.internet.username().toLowerCase(),
+        profileImageUrl: () =>
+          `https://avatars.githubusercontent.com/u/${Math.floor(
+            Math.random() * 100_000
+          )}?v=4`,
+        bio: () => faker.lorem.sentence(),
+        followers: () => faker.number.int({ min: 10, max: 5000 }),
+        isVerified: () => faker.helpers.arrayElement([true, false]),
+      }),
     },
     seeds(server) {
       zerocho = server.create("user", {
@@ -85,6 +101,7 @@ if (__DEV__) {
           user,
         });
       });
+      server.createList("search", 10);
     },
     routes() {
       this.post("/posts", (schema, request) => {
@@ -97,7 +114,26 @@ if (__DEV__) {
             user: schema.find("user", "zerohch0"),
           });
         });
+
         return new Response(200, {}, { posts });
+      });
+
+      this.get("/search", (schema, request) => {
+        const query = (request.queryParams.q as string)?.toLowerCase() || "";
+        let users = schema.all("search").models;
+
+        if (query) {
+          users = users.filter(
+            (user: any) =>
+              user.username.toLowerCase().includes(query) ||
+              user.name.toLowerCase().includes(query)
+          );
+        }
+        return new Response(
+          200,
+          {},
+          { users: users.map((user: any) => user.attrs) }
+        );
       });
 
       this.get("/posts", (schema, request) => {
