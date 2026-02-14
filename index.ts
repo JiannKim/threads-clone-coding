@@ -145,8 +145,24 @@ if (__DEV__) {
             user: schema.find("user", "zerohch0"),
           });
         });
+        return posts;
+      });
 
-        return new Response(200, {}, { posts });
+      this.get("/posts", (schema, request) => {
+        const posts = schema.all("post");
+        let targetIndex = 0;
+        if (request.queryParams.cursor) {
+          targetIndex = posts.models.findIndex(
+            (post: any) => post.id === request.queryParams.cursor
+          );
+        }
+        return schema.all("post").slice(targetIndex + 1, targetIndex + 11);
+      });
+
+      this.get("/posts/:id", (schema, request) => {
+        const post = schema.find("post", request.params.id);
+        const comments = schema.all("post").models.slice(0, 10);
+        return new Response(200, {}, { post, comments });
       });
 
       this.get("/search", (schema, request) => {
@@ -165,19 +181,6 @@ if (__DEV__) {
           {},
           { users: users.map((user: any) => user.attrs) }
         );
-      });
-
-      this.get("/posts", (schema, request) => {
-        console.log("user.all", schema.all("user").models);
-        const cursor = parseInt((request.queryParams.cursor as string) || "0");
-        const posts = schema.all("post").models.slice(cursor, cursor + 10);
-        return new Response(200, {}, { posts });
-      });
-
-      this.get("/posts/:id", (schema, request) => {
-        const post = schema.find("post", request.params.id);
-        const comments = schema.all("post").models.slice(0, 10);
-        return new Response(200, {}, { post, comments });
       });
 
       this.get("/activity", (schema: any, request) => {
