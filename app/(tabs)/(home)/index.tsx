@@ -6,20 +6,18 @@ import {
   useColorScheme,
   ScrollView,
 } from "react-native";
-import { usePathname, useRouter } from "expo-router";
-import { useEffect, useState, useCallback } from "react";
+import { usePathname } from "expo-router";
+import { useState, useCallback, useEffect } from "react";
 import Post, { Post as PostType } from "../../../components/Post";
 import { FlashList } from "@shopify/flash-list";
 
 export default function Index() {
-  const router = useRouter();
   const colorScheme = useColorScheme();
   const path = usePathname();
   const [posts, setPosts] = useState<PostType[]>([]);
 
   useEffect(() => {
-    setPosts([]);
-    fetch(`http://localhost:3000/posts?type=${path.split("/").pop()}`)
+    fetch(`/posts`)
       .then((res) => res.json())
       .then((data) => {
         setPosts(data.posts);
@@ -31,9 +29,7 @@ export default function Index() {
     const lastId = posts.at(-1)?.id;
     if (!lastId) return;
 
-    fetch(
-      `http://localhost:3000/posts?type=${path.split("/").pop()}&cursor=${lastId}`
-    )
+    fetch(`/posts?cursor=${lastId}`)
       .then((res) => res.json())
       .then((data) => {
         if (data.posts.length > 0) {

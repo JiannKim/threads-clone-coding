@@ -54,9 +54,7 @@ export default function Index() {
     const typeParam = pathnameToType[pathname] || "all";
     const fetchActivities = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:3000/activity?type=${typeParam}`
-        );
+        const response = await fetch(`/activity?type=${typeParam}`);
         const data = await response.json();
         setActivities(data.activities ?? []);
       } catch (error) {
@@ -88,225 +86,232 @@ export default function Index() {
         colorScheme === "dark" ? styles.containerDark : styles.containerLight,
       ]}
     >
-      <View
-        style={[
-          styles.header,
-          colorScheme === "dark" ? styles.headerDark : styles.headerLight,
-        ]}
-      >
-        {isLoggedIn && (
-          <Pressable
-            style={styles.menuButton}
-            onPress={() => {
-              setIsSideMenuOpen(true);
-            }}
-          >
-            <Ionicons
-              name="menu"
-              size={24}
-              color={colorScheme === "dark" ? "gray" : "black"}
-            />
-          </Pressable>
-        )}
-        <Image
-          source={require("../../../assets/images/react-logo.png")}
-          style={styles.logo}
-        />
-        <SideMenu
-          isVisible={isSideMenuOpen}
-          onClose={() => setIsSideMenuOpen(false)}
-        />
+      <View style={styles.topSection}>
+        <View
+          style={[
+            styles.header,
+            colorScheme === "dark" ? styles.headerDark : styles.headerLight,
+          ]}
+        >
+          {isLoggedIn && (
+            <Pressable
+              style={styles.menuButton}
+              onPress={() => {
+                setIsSideMenuOpen(true);
+              }}
+            >
+              <Ionicons
+                name="menu"
+                size={24}
+                color={colorScheme === "dark" ? "gray" : "black"}
+              />
+            </Pressable>
+          )}
+          <Image
+            source={require("../../../assets/images/react-logo.png")}
+            style={styles.logo}
+          />
+          <SideMenu
+            isVisible={isSideMenuOpen}
+            onClose={() => setIsSideMenuOpen(false)}
+          />
+        </View>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.tabBarScroll}
+          contentContainerStyle={styles.tabBarContent}
+        >
+          <View>
+            <TouchableOpacity
+              style={[
+                styles.tabButton,
+                colorScheme === "dark"
+                  ? styles.tabButtonDark
+                  : styles.tabButtonLight,
+                pathname === "/activity" &&
+                  (colorScheme === "dark"
+                    ? styles.tabButtonActiveDark
+                    : styles.tabButtonActiveLight),
+              ]}
+              onPress={() => router.replace(`/activity`)}
+            >
+              <Text
+                style={[
+                  styles.tabButtonText,
+                  colorScheme === "dark"
+                    ? styles.tabButtonTextDark
+                    : styles.tabButtonTextLight,
+                ]}
+              >
+                All
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <View>
+            <TouchableOpacity
+              style={[
+                styles.tabButton,
+                colorScheme === "dark"
+                  ? styles.tabButtonDark
+                  : styles.tabButtonLight,
+                pathname === "/activity/follows" &&
+                  (colorScheme === "dark"
+                    ? styles.tabButtonActiveDark
+                    : styles.tabButtonActiveLight),
+              ]}
+              onPress={() => router.replace(`/activity/follows`)}
+            >
+              <Text
+                style={[
+                  styles.tabButtonText,
+                  colorScheme === "dark"
+                    ? styles.tabButtonTextDark
+                    : styles.tabButtonTextLight,
+                ]}
+              >
+                Follows
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <View>
+            <TouchableOpacity
+              style={[
+                styles.tabButton,
+                colorScheme === "dark"
+                  ? styles.tabButtonDark
+                  : styles.tabButtonLight,
+                pathname === "/activity/replies" &&
+                  (colorScheme === "dark"
+                    ? styles.tabButtonActiveDark
+                    : styles.tabButtonActiveLight),
+              ]}
+              onPress={() => router.replace(`/activity/replies`)}
+            >
+              <Text
+                style={[
+                  styles.tabButtonText,
+                  colorScheme === "dark"
+                    ? styles.tabButtonTextDark
+                    : styles.tabButtonTextLight,
+                ]}
+              >
+                Replies
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <View>
+            <TouchableOpacity
+              style={[
+                styles.tabButton,
+                colorScheme === "dark"
+                  ? styles.tabButtonDark
+                  : styles.tabButtonLight,
+                pathname === "/activity/mentions" &&
+                  (colorScheme === "dark"
+                    ? styles.tabButtonActiveDark
+                    : styles.tabButtonActiveLight),
+              ]}
+              onPress={() => router.replace(`/activity/mentions`)}
+            >
+              <Text
+                style={[
+                  styles.tabButtonText,
+                  colorScheme === "dark"
+                    ? styles.tabButtonTextDark
+                    : styles.tabButtonTextLight,
+                ]}
+              >
+                Mentions
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <View>
+            <TouchableOpacity
+              style={[
+                styles.tabButton,
+                colorScheme === "dark"
+                  ? styles.tabButtonDark
+                  : styles.tabButtonLight,
+                pathname === "/activity/quotes" &&
+                  (colorScheme === "dark"
+                    ? styles.tabButtonActiveDark
+                    : styles.tabButtonActiveLight),
+              ]}
+              onPress={() => router.replace(`/activity/quotes`)}
+            >
+              <Text
+                style={[
+                  styles.tabButtonText,
+                  colorScheme === "dark"
+                    ? styles.tabButtonTextDark
+                    : styles.tabButtonTextLight,
+                ]}
+              >
+                Quotes
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <View>
+            <TouchableOpacity
+              style={[
+                styles.tabButton,
+                colorScheme === "dark"
+                  ? styles.tabButtonDark
+                  : styles.tabButtonLight,
+                pathname === "/activity/reposts" &&
+                  (colorScheme === "dark"
+                    ? styles.tabButtonActiveDark
+                    : styles.tabButtonActiveLight),
+              ]}
+              onPress={() => router.replace(`/activity/reposts`)}
+            >
+              <Text
+                style={[
+                  styles.tabButtonText,
+                  colorScheme === "dark"
+                    ? styles.tabButtonTextDark
+                    : styles.tabButtonTextLight,
+                ]}
+              >
+                Reposts
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <View>
+            <TouchableOpacity
+              style={[
+                styles.tabButton,
+                colorScheme === "dark"
+                  ? styles.tabButtonDark
+                  : styles.tabButtonLight,
+                pathname === "/activity/verified" &&
+                  (colorScheme === "dark"
+                    ? styles.tabButtonActiveDark
+                    : styles.tabButtonActiveLight),
+              ]}
+              onPress={() => router.replace(`/activity/verified`)}
+            >
+              <Text
+                style={[
+                  styles.tabButtonText,
+                  colorScheme === "dark"
+                    ? styles.tabButtonTextDark
+                    : styles.tabButtonTextLight,
+                ]}
+              >
+                Verified
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
       </View>
       <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.tabBarScroll}
-        contentContainerStyle={styles.tabBarContent}
+        style={styles.activityList}
+        contentContainerStyle={
+          activities.length === 0 ? styles.activityListEmpty : undefined
+        }
       >
-        <View>
-          <TouchableOpacity
-            style={[
-              styles.tabButton,
-              colorScheme === "dark"
-                ? styles.tabButtonDark
-                : styles.tabButtonLight,
-              pathname === "/activity" &&
-                (colorScheme === "dark"
-                  ? styles.tabButtonActiveDark
-                  : styles.tabButtonActiveLight),
-            ]}
-            onPress={() => router.replace(`/activity`)}
-          >
-            <Text
-              style={[
-                styles.tabButtonText,
-                colorScheme === "dark"
-                  ? styles.tabButtonTextDark
-                  : styles.tabButtonTextLight,
-              ]}
-            >
-              All
-            </Text>
-          </TouchableOpacity>
-        </View>
-        <View>
-          <TouchableOpacity
-            style={[
-              styles.tabButton,
-              colorScheme === "dark"
-                ? styles.tabButtonDark
-                : styles.tabButtonLight,
-              pathname === "/activity/follows" &&
-                (colorScheme === "dark"
-                  ? styles.tabButtonActiveDark
-                  : styles.tabButtonActiveLight),
-            ]}
-            onPress={() => router.replace(`/activity/follows`)}
-          >
-            <Text
-              style={[
-                styles.tabButtonText,
-                colorScheme === "dark"
-                  ? styles.tabButtonTextDark
-                  : styles.tabButtonTextLight,
-              ]}
-            >
-              Follows
-            </Text>
-          </TouchableOpacity>
-        </View>
-        <View>
-          <TouchableOpacity
-            style={[
-              styles.tabButton,
-              colorScheme === "dark"
-                ? styles.tabButtonDark
-                : styles.tabButtonLight,
-              pathname === "/activity/replies" &&
-                (colorScheme === "dark"
-                  ? styles.tabButtonActiveDark
-                  : styles.tabButtonActiveLight),
-            ]}
-            onPress={() => router.replace(`/activity/replies`)}
-          >
-            <Text
-              style={[
-                styles.tabButtonText,
-                colorScheme === "dark"
-                  ? styles.tabButtonTextDark
-                  : styles.tabButtonTextLight,
-              ]}
-            >
-              Replies
-            </Text>
-          </TouchableOpacity>
-        </View>
-        <View>
-          <TouchableOpacity
-            style={[
-              styles.tabButton,
-              colorScheme === "dark"
-                ? styles.tabButtonDark
-                : styles.tabButtonLight,
-              pathname === "/activity/mentions" &&
-                (colorScheme === "dark"
-                  ? styles.tabButtonActiveDark
-                  : styles.tabButtonActiveLight),
-            ]}
-            onPress={() => router.replace(`/activity/mentions`)}
-          >
-            <Text
-              style={[
-                styles.tabButtonText,
-                colorScheme === "dark"
-                  ? styles.tabButtonTextDark
-                  : styles.tabButtonTextLight,
-              ]}
-            >
-              Mentions
-            </Text>
-          </TouchableOpacity>
-        </View>
-        <View>
-          <TouchableOpacity
-            style={[
-              styles.tabButton,
-              colorScheme === "dark"
-                ? styles.tabButtonDark
-                : styles.tabButtonLight,
-              pathname === "/activity/quotes" &&
-                (colorScheme === "dark"
-                  ? styles.tabButtonActiveDark
-                  : styles.tabButtonActiveLight),
-            ]}
-            onPress={() => router.replace(`/activity/quotes`)}
-          >
-            <Text
-              style={[
-                styles.tabButtonText,
-                colorScheme === "dark"
-                  ? styles.tabButtonTextDark
-                  : styles.tabButtonTextLight,
-              ]}
-            >
-              Quotes
-            </Text>
-          </TouchableOpacity>
-        </View>
-        <View>
-          <TouchableOpacity
-            style={[
-              styles.tabButton,
-              colorScheme === "dark"
-                ? styles.tabButtonDark
-                : styles.tabButtonLight,
-              pathname === "/activity/reposts" &&
-                (colorScheme === "dark"
-                  ? styles.tabButtonActiveDark
-                  : styles.tabButtonActiveLight),
-            ]}
-            onPress={() => router.replace(`/activity/reposts`)}
-          >
-            <Text
-              style={[
-                styles.tabButtonText,
-                colorScheme === "dark"
-                  ? styles.tabButtonTextDark
-                  : styles.tabButtonTextLight,
-              ]}
-            >
-              Reposts
-            </Text>
-          </TouchableOpacity>
-        </View>
-        <View>
-          <TouchableOpacity
-            style={[
-              styles.tabButton,
-              colorScheme === "dark"
-                ? styles.tabButtonDark
-                : styles.tabButtonLight,
-              pathname === "/activity/verified" &&
-                (colorScheme === "dark"
-                  ? styles.tabButtonActiveDark
-                  : styles.tabButtonActiveLight),
-            ]}
-            onPress={() => router.replace(`/activity/verified`)}
-          >
-            <Text
-              style={[
-                styles.tabButtonText,
-                colorScheme === "dark"
-                  ? styles.tabButtonTextDark
-                  : styles.tabButtonTextLight,
-              ]}
-            >
-              Verified
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-      <ScrollView>
         {activities.map((activity) => (
           <ActivityItem
             key={activity.id}
@@ -336,6 +341,9 @@ const styles = StyleSheet.create({
   },
   containerDark: {
     backgroundColor: "#101010",
+  },
+  topSection: {
+    flexShrink: 0,
   },
   header: {
     flexDirection: "row",
@@ -395,6 +403,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 10,
+  },
+  activityList: {
+    flex: 1,
+  },
+  activityListEmpty: {
+    flexGrow: 1,
   },
   logo: {
     width: 32,

@@ -11,7 +11,6 @@ import {
   Factory,
 } from "miragejs";
 import { faker } from "@faker-js/faker";
-import { type User } from "./app/_layout";
 
 declare global {
   interface Window {
@@ -19,7 +18,7 @@ declare global {
   }
 }
 
-let zerocho: User;
+let dominica: { id?: string } | undefined;
 
 if (__DEV__) {
   if (window.server) {
@@ -27,7 +26,6 @@ if (__DEV__) {
   }
 
   window.server = createServer({
-    urlPrefix: "http://localhost:3000",
     models: {
       user: Model.extend({
         posts: hasMany("post"),
@@ -115,10 +113,10 @@ if (__DEV__) {
       }),
     },
     seeds(server) {
-      zerocho = server.create("user", {
-        id: "zerohch0",
-        name: "ZeroCho",
-        description: "🐢 lover, programmer, youtuber",
+      dominica = server.create("user", {
+        id: "dominica.world",
+        name: "김지안",
+        description: "🐢 프로그래머, jongin's mother",
         profileImageUrl: "https://avatars.githubusercontent.com/u/885857?v=4",
       });
       const users = server.createList("user", 10);
@@ -127,7 +125,9 @@ if (__DEV__) {
           user,
         });
       });
-      server.createList("search", 10);
+      server.createList("post", 5, {
+        user: dominica as any,
+      });
 
       const usersForActivity = server.schema.all("user").models;
       usersForActivity.forEach((user: any) => {
@@ -142,21 +142,26 @@ if (__DEV__) {
             content: post.content,
             imageUrls: post.imageUrls,
             location: post.location,
-            user: schema.find("user", "zerohch0"),
+            user: schema.find("user", "dominica.world"),
           });
         });
         return posts;
       });
 
       this.get("/posts", (schema, request) => {
-        const posts = schema.all("post");
-        let targetIndex = 0;
+        console.log("request", request.queryParams);
+        let posts = schema.all("post");
+        if (request.queryParams.type === "following") {
+          posts = posts.filter((post: any) => post.user?.id === dominica?.id);
+        }
+
+        let targetIndex = -1;
         if (request.queryParams.cursor) {
           targetIndex = posts.models.findIndex(
             (post: any) => post.id === request.queryParams.cursor
           );
         }
-        return schema.all("post").slice(targetIndex + 1, targetIndex + 11);
+        return posts.slice(targetIndex + 1, targetIndex + 11);
       });
 
       this.get("/posts/:id", (schema, request) => {
@@ -236,7 +241,7 @@ if (__DEV__) {
               name: "김지안",
               description: "🐢 프로그래머, jongin's mother",
               profileImageUrl:
-                "https://avatars.githubusercontent.com/u/123456789?v=4",
+                "https://avatars.githubusercontent.com/u/885857?v=4",
             },
           };
         } else {
