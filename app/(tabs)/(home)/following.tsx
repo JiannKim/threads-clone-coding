@@ -15,6 +15,7 @@ export default function Following() {
   const colorScheme = useColorScheme();
   const path = usePathname();
   const [posts, setPosts] = useState<PostType[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     setPosts([]);
@@ -40,6 +41,18 @@ export default function Following() {
       .catch(console.error);
   }, [posts, path]);
 
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetch(`/posts?type=following`)
+      .then((res) => res.json())
+      .then((data) => {
+        setPosts(data.posts);
+      })
+      .finally(() => {
+        setRefreshing(false);
+      });
+  }, [path]);
+
   return (
     <View
       style={[
@@ -49,6 +62,8 @@ export default function Following() {
     >
       <FlashList
         data={posts}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
         renderItem={({ item }) => <Post item={item} />}
         onEndReached={onEndReached}
         onEndReachedThreshold={2}

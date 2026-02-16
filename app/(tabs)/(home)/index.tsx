@@ -15,6 +15,7 @@ export default function Index() {
   const colorScheme = useColorScheme();
   const path = usePathname();
   const [posts, setPosts] = useState<PostType[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     fetch(`/posts`)
@@ -39,6 +40,19 @@ export default function Index() {
       .catch(console.error);
   }, [posts, path]);
 
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setPosts([]);
+    fetch(`/posts`)
+      .then((res) => res.json())
+      .then((data) => {
+        setPosts(data.posts);
+      })
+      .finally(() => {
+        setRefreshing(false);
+      });
+  }, [path]);
+
   return (
     <View
       style={[
@@ -48,6 +62,8 @@ export default function Index() {
     >
       <FlashList
         data={posts}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
         renderItem={({ item }) => <Post item={item} />}
         onEndReached={onEndReached}
         onEndReachedThreshold={2}
