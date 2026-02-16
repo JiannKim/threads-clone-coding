@@ -5,17 +5,30 @@ import {
   StyleSheet,
   useColorScheme,
   ScrollView,
+  RefreshControl,
 } from "react-native";
 import { usePathname } from "expo-router";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useContext } from "react";
 import Post, { Post as PostType } from "../../../components/Post";
 import { FlashList } from "@shopify/flash-list";
+import * as Haptics from "expo-haptics";
+import Animated, {
+  useAnimatedScrollHandler,
+  useSharedValue,
+  type SharedValue,
+} from "react-native-reanimated";
+import { AnimationContext } from "./_layout";
+
+const AnimatedFlashList = Animated.createAnimatedComponent(FlashList<PostType>);
 
 export default function Index() {
   const colorScheme = useColorScheme();
   const path = usePathname();
   const [posts, setPosts] = useState<PostType[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const { scrollPosition } = useContext(AnimationContext) as {
+    scrollPosition: SharedValue<number>;
+  };
 
   useEffect(() => {
     fetch(`/posts`)
@@ -43,6 +56,7 @@ export default function Index() {
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     setPosts([]);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     fetch(`/posts`)
       .then((res) => res.json())
       .then((data) => {
@@ -53,6 +67,13 @@ export default function Index() {
       });
   }, [path]);
 
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      "worklet";
+      scrollPosition.value = event.contentOffset.y;
+    },
+  });
+
   return (
     <View
       style={[
@@ -60,10 +81,12 @@ export default function Index() {
         colorScheme === "dark" ? styles.containerDark : styles.containerLight,
       ]}
     >
-      <FlashList
+      <AnimatedFlashList
         data={posts}
+        refreshControl={<View />}
+        onScroll={scrollHandler}
+        scrollEventThrottle={16}
         refreshing={refreshing}
-        onRefresh={onRefresh}
         renderItem={({ item }) => <Post item={item} />}
         onEndReached={onEndReached}
         onEndReachedThreshold={2}

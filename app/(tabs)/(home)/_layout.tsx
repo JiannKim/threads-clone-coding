@@ -18,12 +18,17 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
-import { useState, useContext } from "react";
+import { useState, useContext, createContext } from "react";
 import { AuthContext } from "../../_layout";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import SideMenu from "../../../components/SideMenu";
 import { BlurView } from "expo-blur";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  type SharedValue,
+} from "react-native-reanimated";
 const { Navigator } = createMaterialTopTabNavigator();
 
 export const MaterialTopTabs = withLayoutContext<
@@ -33,112 +38,130 @@ export const MaterialTopTabs = withLayoutContext<
   MaterialTopTabNavigationEventMap
 >(Navigator);
 
+export const AnimationContext = createContext<{
+  scrollPosition: SharedValue<number>;
+}>({
+  scrollPosition: null as any,
+});
+
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const insets = useSafeAreaInsets();
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
   const { user } = useContext(AuthContext);
   const isLoggedIn = !!user;
+  const scrollPosition = useSharedValue(0);
+
+  const rotateStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ rotate: `${scrollPosition.value}deg` }],
+    };
+  });
 
   return (
-    <View
-      style={[
-        styles.container,
-        { paddingTop: insets.top, paddingBottom: insets.bottom },
-        colorScheme === "dark" ? styles.containerDark : styles.containerLight,
-      ]}
-    >
-      <BlurView
+    <AnimationContext value={{ scrollPosition }}>
+      <View
         style={[
-          styles.header,
-          colorScheme === "dark" ? styles.headerDark : styles.headerLight,
+          styles.container,
+          { paddingTop: insets.top, paddingBottom: insets.bottom },
+          colorScheme === "dark" ? styles.containerDark : styles.containerLight,
         ]}
-        intensity={colorScheme === "dark" ? 5 : 70}
       >
-        {isLoggedIn && (
-          <Pressable
-            style={styles.menuButton}
-            onPress={() => {
-              setIsSideMenuOpen(true);
-            }}
-          >
-            <Ionicons
-              name="menu"
-              size={24}
-              color={colorScheme === "dark" ? "gray" : "black"}
-            />
-          </Pressable>
-        )}
-        <SideMenu
-          isVisible={isSideMenuOpen}
-          onClose={() => setIsSideMenuOpen(false)}
-        />
-        <Image
-          source={require("../../../assets/images/react-logo.png")}
-          style={styles.headerLogo}
-        />
-        {!isLoggedIn && (
-          <TouchableOpacity
-            style={[
-              styles.loginButton,
-              colorScheme === "dark"
-                ? styles.loginButtonDark
-                : styles.loginButtonLight,
-            ]}
-            onPress={() => {
-              console.log("loginButton onPress");
-              router.navigate(`/login`);
-            }}
-          >
-            <Text
-              style={
-                colorScheme === "dark"
-                  ? styles.loginButtonTextDark
-                  : styles.loginButtonTextLight
-              }
-            >
-              로그인
-            </Text>
-          </TouchableOpacity>
-        )}
-      </BlurView>
-      {isLoggedIn ? (
-        <MaterialTopTabs
-          screenOptions={{
-            lazy: true,
-            tabBarStyle: {
-              backgroundColor: colorScheme === "dark" ? "#101010" : "white",
-              shadowColor: "transparent",
-              position: "relative",
-            },
-            tabBarLabelStyle: {
-              fontSize: 16,
-              fontWeight: "bold",
-            },
-            tabBarPressColor: "transparent",
-            tabBarActiveTintColor: colorScheme === "dark" ? "white" : "#555",
-            tabBarIndicatorStyle: {
-              backgroundColor: colorScheme === "dark" ? "white" : "black",
-              height: 1,
-            },
-            tabBarIndicatorContainerStyle: {
-              backgroundColor: colorScheme === "dark" ? "#aaa" : "#555",
-              position: "absolute",
-              top: 49,
-              height: 1,
-            },
-          }}
+        <BlurView
+          style={[
+            styles.header,
+            colorScheme === "dark" ? styles.headerDark : styles.headerLight,
+          ]}
+          intensity={colorScheme === "dark" ? 5 : 70}
         >
-          <MaterialTopTabs.Screen name="index" options={{ title: "For You" }} />
-          <MaterialTopTabs.Screen
-            name="following"
-            options={{ title: "Following" }}
+          {isLoggedIn && (
+            <Pressable
+              style={styles.menuButton}
+              onPress={() => {
+                setIsSideMenuOpen(true);
+              }}
+            >
+              <Ionicons
+                name="menu"
+                size={24}
+                color={colorScheme === "dark" ? "gray" : "black"}
+              />
+            </Pressable>
+          )}
+          <SideMenu
+            isVisible={isSideMenuOpen}
+            onClose={() => setIsSideMenuOpen(false)}
           />
-        </MaterialTopTabs>
-      ) : (
-        <Slot />
-      )}
-    </View>
+          <Animated.Image
+            source={require("../../../assets/images/react-logo.png")}
+            style={[styles.headerLogo, rotateStyle]}
+          />
+          {!isLoggedIn && (
+            <TouchableOpacity
+              style={[
+                styles.loginButton,
+                colorScheme === "dark"
+                  ? styles.loginButtonDark
+                  : styles.loginButtonLight,
+              ]}
+              onPress={() => {
+                console.log("loginButton onPress");
+                router.navigate(`/login`);
+              }}
+            >
+              <Text
+                style={
+                  colorScheme === "dark"
+                    ? styles.loginButtonTextDark
+                    : styles.loginButtonTextLight
+                }
+              >
+                로그인
+              </Text>
+            </TouchableOpacity>
+          )}
+        </BlurView>
+        {isLoggedIn ? (
+          <MaterialTopTabs
+            screenOptions={{
+              lazy: true,
+              tabBarStyle: {
+                backgroundColor: colorScheme === "dark" ? "#101010" : "white",
+                shadowColor: "transparent",
+                position: "relative",
+              },
+              tabBarLabelStyle: {
+                fontSize: 16,
+                fontWeight: "bold",
+              },
+              tabBarPressColor: "transparent",
+              tabBarActiveTintColor: colorScheme === "dark" ? "white" : "#555",
+              tabBarIndicatorStyle: {
+                backgroundColor: colorScheme === "dark" ? "white" : "black",
+                height: 1,
+              },
+              tabBarIndicatorContainerStyle: {
+                backgroundColor: colorScheme === "dark" ? "#aaa" : "#555",
+                position: "absolute",
+                top: 49,
+                height: 1,
+              },
+            }}
+          >
+            <MaterialTopTabs.Screen
+              name="index"
+              options={{ title: "For You" }}
+            />
+            <MaterialTopTabs.Screen
+              name="following"
+              options={{ title: "Following" }}
+            />
+          </MaterialTopTabs>
+        ) : (
+          <Slot />
+        )}
+      </View>
+    </AnimationContext>
   );
 }
 
