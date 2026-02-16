@@ -24,22 +24,24 @@ export interface ActivityItemProps {
   postId?: string;
 }
 
-export default function ActivityItem({
-  id,
-  username,
-  otherCount,
-  timeAgo,
-  content,
-  type,
-  link,
-  reply,
-  likes,
-  actionButton,
-  avatar,
-  postId,
-}: ActivityItemProps) {
+export default function ActivityItem({ item }: { item: ActivityItemProps }) {
   const router = useRouter();
   const colorScheme = useColorScheme();
+
+  const {
+    id,
+    username,
+    otherCount,
+    timeAgo,
+    content,
+    type,
+    link,
+    reply,
+    likes,
+    actionButton,
+    avatar,
+    postId,
+  } = item;
 
   let iconColor = "#FF3B30";
   let iconName: any = "heart";
@@ -112,9 +114,7 @@ export default function ActivityItem({
           >
             {username}
           </Text>
-          {otherCount && (
-            <Text style={styles.otherCount}>+{otherCount}f명</Text>
-          )}
+          {otherCount && <Text style={styles.otherCount}>+{otherCount}명</Text>}
           <Text
             style={[
               styles.timeAgo,
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
   },
   activityContent: {
     flex: 1,
-    paddingBottom: 8, 
+    paddingBottom: 8,
     borderBottomWidth: 1,
     borderBottomColor: "#333",
   },

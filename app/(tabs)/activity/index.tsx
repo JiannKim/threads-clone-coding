@@ -12,10 +12,11 @@ import { usePathname, useRouter } from "expo-router";
 import NotFound from "../../+not-found";
 import { Ionicons } from "@expo/vector-icons";
 import SideMenu from "../../../components/SideMenu";
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../_layout";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ActivityItem from "../../../components/Activity";
+import { FlashList } from "@shopify/flash-list";
 
 type ActivityItemData = {
   id: string;
@@ -42,7 +43,7 @@ const pathnameToType: Record<string, string> = {
 
 export default function Index() {
   const router = useRouter();
-  const pathname = usePathname();
+  const path = usePathname();
   const insets = useSafeAreaInsets();
   const { user } = useContext(AuthContext);
   const colorScheme = useColorScheme();
@@ -51,7 +52,7 @@ export default function Index() {
   const [activities, setActivities] = useState<ActivityItemData[]>([]);
 
   useEffect(() => {
-    const typeParam = pathnameToType[pathname] || "all";
+    const typeParam = pathnameToType[path] || "all";
     const fetchActivities = async () => {
       try {
         const response = await fetch(`/activity?type=${typeParam}`);
@@ -62,7 +63,17 @@ export default function Index() {
       }
     };
     fetchActivities();
-  }, [pathname]);
+  }, [path]);
+
+  const onEndReached = useCallback(() => {
+    const lastId = activities.at(-1)?.id;
+    if (!lastId) return;
+    fetch(`/activity?type=${pathnameToType[path]}&cursor=${lastId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setActivities((prev) => [...prev, ...data.activities]);
+      });
+  }, [path]);
 
   if (
     ![
@@ -73,7 +84,7 @@ export default function Index() {
       "/activity/quotes",
       "/activity/reposts",
       "/activity/verified",
-    ].includes(pathname)
+    ].includes(path)
   ) {
     return <NotFound />;
   }
@@ -129,7 +140,7 @@ export default function Index() {
                 colorScheme === "dark"
                   ? styles.tabButtonDark
                   : styles.tabButtonLight,
-                pathname === "/activity" &&
+                path === "/activity" &&
                   (colorScheme === "dark"
                     ? styles.tabButtonActiveDark
                     : styles.tabButtonActiveLight),
@@ -155,7 +166,7 @@ export default function Index() {
                 colorScheme === "dark"
                   ? styles.tabButtonDark
                   : styles.tabButtonLight,
-                pathname === "/activity/follows" &&
+                path === "/activity/follows" &&
                   (colorScheme === "dark"
                     ? styles.tabButtonActiveDark
                     : styles.tabButtonActiveLight),
@@ -181,7 +192,7 @@ export default function Index() {
                 colorScheme === "dark"
                   ? styles.tabButtonDark
                   : styles.tabButtonLight,
-                pathname === "/activity/replies" &&
+                path === "/activity/replies" &&
                   (colorScheme === "dark"
                     ? styles.tabButtonActiveDark
                     : styles.tabButtonActiveLight),
@@ -207,7 +218,7 @@ export default function Index() {
                 colorScheme === "dark"
                   ? styles.tabButtonDark
                   : styles.tabButtonLight,
-                pathname === "/activity/mentions" &&
+                path === "/activity/mentions" &&
                   (colorScheme === "dark"
                     ? styles.tabButtonActiveDark
                     : styles.tabButtonActiveLight),
@@ -233,7 +244,7 @@ export default function Index() {
                 colorScheme === "dark"
                   ? styles.tabButtonDark
                   : styles.tabButtonLight,
-                pathname === "/activity/quotes" &&
+                path === "/activity/quotes" &&
                   (colorScheme === "dark"
                     ? styles.tabButtonActiveDark
                     : styles.tabButtonActiveLight),
@@ -259,7 +270,7 @@ export default function Index() {
                 colorScheme === "dark"
                   ? styles.tabButtonDark
                   : styles.tabButtonLight,
-                pathname === "/activity/reposts" &&
+                path === "/activity/reposts" &&
                   (colorScheme === "dark"
                     ? styles.tabButtonActiveDark
                     : styles.tabButtonActiveLight),
@@ -285,7 +296,7 @@ export default function Index() {
                 colorScheme === "dark"
                   ? styles.tabButtonDark
                   : styles.tabButtonLight,
-                pathname === "/activity/verified" &&
+                path === "/activity/verified" &&
                   (colorScheme === "dark"
                     ? styles.tabButtonActiveDark
                     : styles.tabButtonActiveLight),
@@ -306,7 +317,14 @@ export default function Index() {
           </View>
         </ScrollView>
       </View>
-      <ScrollView
+
+      <FlashList
+        data={activities}
+        renderItem={({ item }) => <ActivityItem item={item} />}
+        onEndReached={onEndReached}
+        onEndReachedThreshold={2}
+      />
+      {/* <ScrollView
         style={styles.activityList}
         contentContainerStyle={
           activities.length === 0 ? styles.activityListEmpty : undefined
@@ -327,7 +345,7 @@ export default function Index() {
             reply={activity.reply}
           />
         ))}
-      </ScrollView>
+      </ScrollView> */}
     </View>
   );
 }
