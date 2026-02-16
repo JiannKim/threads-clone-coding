@@ -149,7 +149,6 @@ if (__DEV__) {
       });
 
       this.get("/posts", (schema, request) => {
-        console.log("request", request.queryParams);
         let posts = schema.all("post");
         if (request.queryParams.type === "following") {
           posts = posts.filter((post: any) => post.user?.id === dominica?.id);
@@ -165,9 +164,22 @@ if (__DEV__) {
       });
 
       this.get("/posts/:id", (schema, request) => {
-        const post = schema.find("post", request.params.id);
-        const comments = schema.all("post").models.slice(0, 10);
-        return new Response(200, {}, { post, comments });
+        return schema.find("post", request.params.id);
+      });
+
+      this.get("/posts/:id/comments", (schema, request) => {
+        const comments = schema.all("post");
+        let targetIndex = -1;
+        if (request.queryParams.cursor) {
+          targetIndex = comments.models.findIndex(
+            (comment: any) => comment.id === request.queryParams.cursor
+          );
+        }
+        return comments.slice(targetIndex + 1, targetIndex + 11);
+      });
+
+      this.get("/users/:id", (schema, request) => {
+        return schema.find("user", request.params.id);
       });
 
       this.get("/search", (schema, request) => {

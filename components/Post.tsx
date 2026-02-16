@@ -67,7 +67,7 @@ export default function Post({ item }: { item: Post }) {
       isLiked: false, // 예시: 기본값 false
       shares: 0, // 예시: 기본값 0
     };
-    router.push(`/@${post.user.id}/post/${post.user.id}`);
+    router.push(`/@${post.user.id}/post/${post.id}`);
   };
 
   // 사용자 정보 클릭 핸들러 (아바타 또는 이름)

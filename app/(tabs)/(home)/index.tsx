@@ -83,10 +83,10 @@ export default function Index() {
     >
       <AnimatedFlashList
         data={posts}
-        refreshControl={<View />}
         onScroll={scrollHandler}
         scrollEventThrottle={16}
         refreshing={refreshing}
+        onRefresh={onRefresh}
         renderItem={({ item }) => <Post item={item} />}
         onEndReached={onEndReached}
         onEndReachedThreshold={2}
