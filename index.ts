@@ -184,10 +184,9 @@ if (__DEV__) {
 
       this.get("/users/:id/:type", (schema, request) => {
         console.log("request", request.queryParams);
-        const userId =
-          request.params.id.startsWith("@")
-            ? request.params.id.slice(1)
-            : request.params.id;
+        const userId = request.params.id.startsWith("@")
+          ? request.params.id.slice(1)
+          : request.params.id;
         let posts = schema.all("post");
         if (request.params.type === "threads") {
           posts = posts.filter((post) => post.user?.id === userId);
@@ -248,7 +247,7 @@ if (__DEV__) {
             username: user?.attrs?.id ?? "unknown",
             avatar:
               user?.attrs?.profileImageUrl ??
-              "https://avatars.githubusercontent.com/u/1?v=4",
+              "https://avatars.githubusercontent.com/u/885857?v=4",
             timeAgo: activity.attrs.timeAgo,
             content: activity.attrs.content,
             type: activity.attrs.type,

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useContext } from "react";
 import {
   View,
   Text,
@@ -17,7 +17,7 @@ import { Ionicons, FontAwesome } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Location from "expo-location";
 import * as ImagePicker from "expo-image-picker";
-
+import { AuthContext } from "./_layout";
 interface Thread {
   id: string;
   text: string;
@@ -33,11 +33,17 @@ export function ListFooter({
   canAddThread: boolean;
   addThread: () => void;
 }) {
+  const { user } = useContext(AuthContext);
+
   return (
     <View style={styles.listFooter}>
       <View style={styles.listFooterAvatar}>
         <Image
-          source={require("../assets/images/avatar.png")}
+          source={{
+            uri:
+              user?.profileImageUrl ??
+              "https://avatars.githubusercontent.com/u/885857?v=4",
+          }}
           style={styles.avatarSmall}
         />
       </View>
@@ -56,6 +62,7 @@ export function ListFooter({
 
 export default function Modal() {
   const router = useRouter();
+  const { user } = useContext(AuthContext);
   const [threads, setThreads] = useState<Thread[]>([
     { id: Date.now().toString(), text: "", imageUris: [] },
   ]);
@@ -264,7 +271,11 @@ export default function Modal() {
     <View style={styles.threadContainer}>
       <View style={styles.avatarContainer}>
         <Image
-          source={require("../assets/images/avatar.png")}
+          source={{
+            uri:
+              user?.profileImageUrl ??
+              "https://avatars.githubusercontent.com/u/885857?v=4",
+          }}
           style={styles.avatar}
         />
         <View style={styles.threadLine} />
