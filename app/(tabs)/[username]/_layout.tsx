@@ -18,8 +18,8 @@ import {
   StyleSheet,
   Share,
 } from "react-native";
-import { useState, useContext } from "react";
-import { AuthContext } from "../../_layout";
+import { useState, useContext, useEffect } from "react";
+import { AuthContext, User } from "../../_layout";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import SideMenu from "../../../components/SideMenu";
@@ -42,6 +42,20 @@ export default function TabLayout() {
   const isLoggedIn = !!user;
   const { username } = useLocalSearchParams();
   const isOwnProfile = isLoggedIn && user?.id === username?.slice(1);
+  const [profile, setProfile] = useState<User | null>(null);
+
+  useEffect(() => {
+    if (username !== `@${user?.id}`) {
+      setProfile(null);
+      fetch(`/users/${username}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setProfile(data?.user);
+        });
+    } else {
+      setProfile(user);
+    }
+  }, [username]);
 
   const handleOpenEditModal = () => {
     setIsEditModalVisible(true);
@@ -101,7 +115,7 @@ export default function TabLayout() {
       <View style={styles.profile}>
         <View style={styles.profileHeader}>
           <Image
-            source={{ uri: user?.profileImageUrl }}
+            source={{ uri: profile?.profileImageUrl }}
             style={styles.profileAvatar}
           />
           <Text
@@ -112,7 +126,7 @@ export default function TabLayout() {
                 : styles.profileNameLight,
             ]}
           >
-            {user?.name}
+            {profile?.name}
           </Text>
           <Text
             style={[
@@ -122,7 +136,7 @@ export default function TabLayout() {
                 : styles.profileTextLight,
             ]}
           >
-            {user?.id}
+            {profile?.id}
           </Text>
           <Text
             style={[
@@ -131,7 +145,7 @@ export default function TabLayout() {
                 : styles.profileTextLight,
             ]}
           >
-            {user?.description}
+            {profile?.description}
           </Text>
         </View>
         <View style={styles.profileActions}>
@@ -200,11 +214,11 @@ export default function TabLayout() {
         </View>
       </View>
 
-      {user && (
+      {profile && (
         <EditProfileModal
           visible={isEditModalVisible}
           onClose={handleCloseEditModal}
-          initialProfileData={user}
+          initialProfileData={profile}
         />
       )}
       <MaterialTopTabs

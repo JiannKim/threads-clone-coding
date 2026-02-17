@@ -179,7 +179,28 @@ if (__DEV__) {
       });
 
       this.get("/users/:id", (schema, request) => {
-        return schema.find("user", request.params.id);
+        return schema.find("user", request.params.id.slice(1));
+      });
+
+      this.get("/users/:id/:type", (schema, request) => {
+        console.log("request", request.queryParams);
+        const userId =
+          request.params.id.startsWith("@")
+            ? request.params.id.slice(1)
+            : request.params.id;
+        let posts = schema.all("post");
+        if (request.params.type === "threads") {
+          posts = posts.filter((post) => post.user?.id === userId);
+        } else if (request.params.type === "reposts") {
+          posts = posts.filter((post) => post.user?.id !== userId);
+        }
+        let targetIndex = -1;
+        if (request.queryParams.cursor) {
+          targetIndex = posts.models.findIndex(
+            (v) => v.id === request.queryParams.cursor
+          );
+        }
+        return posts.slice(targetIndex + 1, targetIndex + 11);
       });
 
       this.get("/search", (schema, request) => {
