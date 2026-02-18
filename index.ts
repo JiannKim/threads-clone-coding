@@ -67,7 +67,7 @@ if (__DEV__) {
         content: () => faker.lorem.paragraph(),
         imageUrls: () =>
           Array.from({ length: Math.floor(Math.random() * 3) }, () =>
-            faker.image.urlLoremFlickr()
+            faker.image.urlLoremFlickr({ category: "earth" })
           ),
         likes: () => Math.floor(Math.random() * 100),
         comments: () => Math.floor(Math.random() * 100),
@@ -114,7 +114,7 @@ if (__DEV__) {
     },
     seeds(server) {
       dominica = server.create("user", {
-        id: "dominica.world",
+        id: "dominica",
         name: "김지안",
         description: "🐢 프로그래머, jongin's mother",
         profileImageUrl: "https://avatars.githubusercontent.com/u/885857?v=4",
@@ -168,7 +168,7 @@ if (__DEV__) {
           }
         });
         console.log("form data posts", posts);
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+        await new Promise((resolve) => setTimeout(resolve, 3000));
         posts.forEach((post: any) => {
           schema.create("post", {
             id: post.id,
@@ -224,6 +224,8 @@ if (__DEV__) {
         if (request.params.type === "threads") {
           posts = posts.filter((post) => post.user?.id === userId);
         } else if (request.params.type === "reposts") {
+          posts = posts.filter((post) => post.user?.id !== userId);
+        } else if (request.params.type === "replies") {
           posts = posts.filter((post) => post.user?.id !== userId);
         }
         let targetIndex = -1;
@@ -302,7 +304,7 @@ if (__DEV__) {
             accessToken: "access-token",
             refreshToken: "refresh-token",
             user: {
-              id: "dominica.world",
+              id: "dominica",
               name: "김지안",
               description: "🐢 프로그래머, jongin's mother",
               profileImageUrl:

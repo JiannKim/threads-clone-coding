@@ -18,6 +18,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Location from "expo-location";
 import * as ImagePicker from "expo-image-picker";
 import { AuthContext } from "./_layout";
+import Toast, { BaseToast } from "react-native-toast-message";
 interface Thread {
   id: string;
   text: string;
@@ -86,12 +87,13 @@ export default function Modal() {
 
   const handlePost = () => {
     console.log("handlePost", threads);
+    setIsPosting(true);
 
     const formData = new FormData();
     threads.forEach((thread, index) => {
       formData.append(`posts[${index}][id]`, thread.id);
       formData.append(`posts[${index}][content]`, thread.text);
-      formData.append(`posts[${index}][userID]`, "dominica.world");
+      formData.append(`posts[${index}][userID]`, "dominica");
       formData.append(
         `posts[${index}][location]`,
         JSON.stringify(thread.location)
@@ -105,6 +107,15 @@ export default function Modal() {
       });
     });
 
+    Toast.show({
+      text1: "Posting...",
+      type: "customToast",
+      visibilityTime: 3000,
+      position: "bottom",
+      bottomOffset: 40,
+      onPress: () => Toast.hide(),
+    });
+
     fetch("/posts", {
       method: "POST",
       headers: {
@@ -115,10 +126,31 @@ export default function Modal() {
       .then((res) => res.json())
       .then((data) => {
         console.log("handlePost result", data);
-        router.replace(`/@${data[0].user?.id}/post/${data[0].id}`);
+        Toast.show({
+          text1: "Post posted",
+          type: "customToast",
+          visibilityTime: 3000,
+          position: "bottom",
+          bottomOffset: 40,
+          onPress: () => Toast.hide(),
+        });
+        router.replace(`/@${user?.id}/post/${data[0].id}?justPosted=1`);
       })
       .catch((err) => {
         console.error("handlePost error", err);
+        setIsPosting(false);
+        Toast.hide();
+        Toast.show({
+          text1: "Posting failed",
+          visibilityTime: 3000,
+          type: "customToast",
+          position: "bottom",
+          bottomOffset: 40,
+          onPress: () => {
+            console.log("post failed", err);
+            Toast.hide();
+          },
+        });
       });
   };
 
@@ -319,7 +351,7 @@ export default function Modal() {
       <View style={styles.contentContainer}>
         <View style={styles.userInfoContainer}>
           <View style={styles.userInfoUsernameContainer}>
-            <Text style={styles.username}>dominica.world</Text>
+            <Text style={styles.username}>{user?.id}</Text>
             <Ionicons
               name="chevron-forward-outline"
               size={14}
@@ -548,6 +580,34 @@ export default function Modal() {
           <Text style={styles.postButtonText}>Post</Text>
         </Pressable>
       </View>
+      <Toast
+        config={{
+          customToast: (props: any) => (
+            <BaseToast
+              style={{
+                backgroundColor: "white",
+                borderRadius: 20,
+                height: 40,
+                borderLeftWidth: 0,
+                shadowOpacity: 2,
+                justifyContent: "center",
+              }}
+              contentContainerStyle={{
+                paddingHorizontal: 16,
+                alignItems: "center",
+                height: 40,
+              }}
+              text1Style={{
+                color: "black",
+                fontSize: 14,
+                fontWeight: "500",
+              }}
+              text1={props.text1}
+              onPress={props.onPress}
+            />
+          ),
+        }}
+      />
     </View>
   );
 }
@@ -704,11 +764,14 @@ const styles = StyleSheet.create({
   },
   dropdownContainer: {
     width: "60%",
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
     backgroundColor: "#fff",
     borderRadius: 10,
     marginHorizontal: 15,
     overflow: "hidden",
-    marginBottom: 10,
   },
   dropdownOption: {
     flexDirection: "row",
