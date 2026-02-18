@@ -18,7 +18,7 @@ declare global {
   }
 }
 
-let dominica: { id?: string } | undefined;
+let dominica: any;
 
 if (__DEV__) {
   if (window.server) {
@@ -126,7 +126,7 @@ if (__DEV__) {
         });
       });
       server.createList("post", 5, {
-        user: dominica as any,
+        user: dominica,
       });
 
       const usersForActivity = server.schema.all("user").models;
@@ -135,14 +135,47 @@ if (__DEV__) {
       });
     },
     routes() {
-      this.post("/posts", (schema, request) => {
-        const { posts } = JSON.parse(request.requestBody);
+      this.post("/posts", async (schema, request) => {
+        const formData = request.requestBody as unknown as FormData;
+        const posts: Record<string, string | string[]>[] = [];
+        formData.forEach(async (value, key) => {
+          const match = key.match(/posts\[(\d+)\]\[(\w+)\](\[(\d+)\])?$/);
+          console.log("key", key, match, value);
+          if (match) {
+            const [_, index, field, , imageIndex] = match;
+            const i = parseInt(index);
+            const imgI = parseInt(imageIndex);
+            if (!posts[i]) {
+              posts[i] = {};
+            }
+            if (field === "imageUrls") {
+              if (!posts[i].imageUrls) {
+                posts[i].imageUrls = [] as string[];
+              }
+              (posts[i].imageUrls as string[])[imgI] = (
+                value as unknown as { uri: string }
+              ).uri;
+            } else if (field === "location") {
+              try {
+                posts[i].location = JSON.parse(value as string)!;
+              } catch (error) {
+                console.log("post location error", error);
+                posts[i].location = [] as string[];
+              }
+            } else {
+              posts[i][field] = value as string;
+            }
+          }
+        });
+        console.log("form data posts", posts);
+        await new Promise((resolve) => setTimeout(resolve, 5000));
         posts.forEach((post: any) => {
           schema.create("post", {
+            id: post.id,
             content: post.content,
             imageUrls: post.imageUrls,
             location: post.location,
-            user: schema.find("user", "dominica.world"),
+            user: schema.find("user", dominica?.id),
           });
         });
         return posts;
