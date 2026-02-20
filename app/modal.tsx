@@ -129,7 +129,7 @@ export default function Modal() {
         Toast.show({
           text1: "Post posted",
           type: "customToast",
-          visibilityTime: 3000,
+          visibilityTime: 5000,
           position: "bottom",
           bottomOffset: 40,
           onPress: () => Toast.hide(),
@@ -142,7 +142,7 @@ export default function Modal() {
         Toast.hide();
         Toast.show({
           text1: "Posting failed",
-          visibilityTime: 3000,
+          visibilityTime: 5000,
           type: "customToast",
           position: "bottom",
           bottomOffset: 40,
