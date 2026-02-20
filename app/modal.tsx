@@ -132,9 +132,11 @@ export default function Modal() {
           visibilityTime: 5000,
           position: "bottom",
           bottomOffset: 40,
-          onPress: () => Toast.hide(),
+          onPress: () => {
+            router.replace(`/@${user?.id}/post/${data[0].id}?justPosted=1`);
+            Toast.hide()
+          },
         });
-        router.replace(`/@${user?.id}/post/${data[0].id}?justPosted=1`);
       })
       .catch((err) => {
         console.error("handlePost error", err);
